@@ -1,3 +1,4 @@
+sudo rmmod npheap.ko
 ./configure
 make
 cd src
