@@ -8,7 +8,7 @@ sudo insmod npheap.ko
 sudo chmod 777 /dev/npheap
 
 mkdir ~/mnt
-nphfuse /dev/npheap ~/mnt -s -d
+nphfuse -s -d /dev/npheap ~/mnt
 
 ls
 df
