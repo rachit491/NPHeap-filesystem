@@ -31,6 +31,18 @@
  * ignored.  The 'st_ino' field is ignored except if the 'use_ino'
  * mount option is given.
  */
+
+static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
+{
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX); // ridiculously long paths will
+            // break here
+
+    fprintf(stdout,"    nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
+      NPHFS_DATA->device_name, path, fpath);
+}
+
+
 int nphfuse_getattr(const char *path, struct stat *stbuf)
 {
     return -ENOENT;
@@ -263,13 +275,32 @@ int nphfuse_fsync(const char *path, int datasync, struct fuse_file_info *fi)
 /** Set extended attributes */
 int nphfuse_setxattr(const char *path, const char *name, const char *value, size_t size, int flags)
 {
-    return -61;
+    char fpath[PATH_MAX];
+    
+    fprintf(stdout,"\nnphfuse_setxattr(path=\"%s\", name=\"%s\", value=\"%s\", size=%d, flags=0x%08x)\n",
+      path, name, value, size, flags);
+    nphfuse_fullpath(fpath, path);
+
+    return log_syscall("lsetxattr", lsetxattr(fpath, name, value, size, flags), 0);
+    //return -61;
 }
 
 /** Get extended attributes */
 int nphfuse_getxattr(const char *path, const char *name, char *value, size_t size)
 {
-    return -61;
+    int retstat = 0;
+    char fpath[PATH_MAX];
+    
+    fprintf(stdout,"\nbb_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
+      path, name, value, size);
+    nphfuse_fullpath(fpath, path);
+
+    retstat = log_syscall("lgetxattr", lgetxattr(fpath, name, value, size), 0);
+    if (retstat >= 0)
+      fprintf(stdout,"    value = \"%s\"\n", value);
+    
+    return retstat;
+//    return -61;
 }
 
 /** List extended attributes */
