@@ -48,9 +48,9 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     char fpath[PATH_MAX];
     int retstat;
     
-    log_msg("\nbb_getattr(path=\"%s\", stbuf=0x%08x)\n",
+    log_msg("\nnphfuse_getattr(path=\"%s\", stbuf=0x%08x)\n",
     path, stbuf);
-    bb_fullpath(fpath, path);
+    nphfuse_fullpath(fpath, path);
 
     retstat = log_syscall("lstat", lstat(fpath, stbuf), 0);
     
@@ -302,7 +302,7 @@ int nphfuse_getxattr(const char *path, const char *name, char *value, size_t siz
     int retstat = 0;
     char fpath[PATH_MAX];
     
-    fprintf(stdout,"\nbb_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
+    fprintf(stdout,"\nnphfuse_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
       path, name, value, size);
     nphfuse_fullpath(fpath, path);
 
