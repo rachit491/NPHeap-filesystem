@@ -48,13 +48,13 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     char fpath[PATH_MAX];
     int retstat;
     
-    log_msg("\nbb_getattr(path=\"%s\", statbuf=0x%08x)\n",
-    path, statbuf);
+    log_msg("\nbb_getattr(path=\"%s\", stbuf=0x%08x)\n",
+    path, stbuf);
     bb_fullpath(fpath, path);
 
-    retstat = log_syscall("lstat", lstat(fpath, statbuf), 0);
+    retstat = log_syscall("lstat", lstat(fpath, stbuf), 0);
     
-    log_stat(statbuf);
+    log_stat(stbuf);
 
     return retstat;
     
