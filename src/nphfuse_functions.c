@@ -25,6 +25,7 @@ int global_offset = 0;
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   log_msg("\nretreive_node\n");
   if(root == NULL) {
+    log_msg("\n root is null\n");
     return NULL;
   }
 
