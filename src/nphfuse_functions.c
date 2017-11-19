@@ -73,7 +73,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     }
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path, PATH_MAX); 
 
     struct file_struct *node = retreive_node(fpath);
@@ -145,7 +145,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path , PATH_MAX);
     
 
@@ -527,11 +527,14 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_conn(conn);
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
+    
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
+    strcpy(NPHFS_DATA->rootdir, "/");
+
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
-    strncat(fpath, "/", PATH_MAX);
+    strcpy(fpath, NPHFS_DATA->rootdir);
+    //strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     
