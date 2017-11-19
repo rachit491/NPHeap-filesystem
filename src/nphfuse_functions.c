@@ -23,6 +23,7 @@
 int global_offset = 0;
 
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
+  log_msg("\nretreive_node\n");
   if(root == NULL) {
     return NULL;
   }
@@ -52,12 +53,12 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
 
 static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 {
-    log_msg("nphfuse_fullpath");
+    log_msg("\nnphfuse_fullpath\n");
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX); 
     // ridiculously long paths will break here
 
-    log_msg("nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
+    log_msg("\nnphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
       NPHFS_DATA->device_name, path, fpath);
 }
 
@@ -75,6 +76,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
 
     struct file_struct *node = retreive_node(fpath);
     if(node == NULL) {
+      log_msg("\nnode not found\n");
       return -ENOENT;
     }
     
@@ -84,7 +86,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
       return -ENOENT;
     }
 
-    log_msg("mapped_data found\n");
+    log_msg("\nmapped_data found\n");
 
     stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
     stbuf->st_atime = mapped_data->dir_struct->st_atime;
@@ -502,7 +504,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_conn(conn);
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
-    log_msg("NPHFS_DATA->device_name %s/n", NPHFS_DATA->device_name);
+    log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     fprintf(stdout, "After Malloc!\n");
