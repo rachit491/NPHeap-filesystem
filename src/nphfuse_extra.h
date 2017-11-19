@@ -18,7 +18,11 @@ struct nphfuse_state {
 };
 
 struct file_struct {
-	char *file_name;
-	struct stat *new_dir;
-	bool is_directory;
-};
+    __u64 offset;
+    char *file_name;
+    char *file_path;
+    struct stat *dir_struct;
+    bool is_directory;
+    file_struct *parent;
+    file_struct *next;
+}*root;
