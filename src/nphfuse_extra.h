@@ -7,8 +7,18 @@
   You may extend this file if necessary  
 */
 
+#include <time.h>
+#include <stdbool.h>
+
 struct nphfuse_state {
     FILE *logfile;
     char *device_name;
     int devfd;
+    char *rootdir;
+};
+
+struct file_struct {
+	char *file_name;
+	struct stat new_dir;
+	bool is_directory;
 };

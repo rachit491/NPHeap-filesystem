@@ -1,4 +1,7 @@
+fusermount -u ~/mnt
+rm -rf ~/mnt
 sudo rmmod npheap.ko
+
 ./configure
 make
 sudo make install

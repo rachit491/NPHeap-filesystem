@@ -34,12 +34,12 @@
 
 static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 {
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path, PATH_MAX); 
     // ridiculously long paths will break here
 
     fprintf(stdout, "nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
-      NPHFS_DATA->device_name, path, fpath);
+      NPHFS_DATA->rootdir, path, fpath);
 }
 
 
@@ -90,7 +90,35 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
 /** Create a directory */
 int nphfuse_mkdir(const char *path, mode_t mode)
 {
-    return -ENOENT;
+    char fpath[PATH_MAX];
+    struct file_struct xyz;
+
+    struct stat new_dir = malloc(sizeof(struct stat));
+    new_dir.st_dev = 64512;
+    new_dir.st_ino = 1701120;
+    new_dir.st_mode = mode;
+    new_dir.st_nlink = 2;
+    new_dir.st_uid = 202360;
+    new_dir.st_gid = 1001;
+    new_dir.st_rdev = 0;
+    new_dir.st_size = 4096;
+    new_dir.st_blksize = 4096;
+    new_dir.st_blocks = 8;
+    new_dir.st_atime = time(NULL);
+    new_dir.st_mtime = time(NULL);
+    new_dir.st_ctime = time(NULL);
+    
+    log_msg("\nnphfuse_mkdir(path=\"%s\", mode=0%3o)\n",
+      path, mode);
+    nphfuse_fullpath(fpath, path);
+
+    xyz.filename = path;
+    xyz.is_directory = true;
+
+    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir.st_ino, sizeof(struct file_struct));
+    memcpy(mem, xyz, sizeof(struct file_struct));
+    return 0;
+    //return log_syscall("mkdir", mkdir(fpath, mode), 0);
 }
 
 /** Remove a file */
