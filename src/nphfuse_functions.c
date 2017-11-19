@@ -460,13 +460,14 @@ int nphfuse_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_in
 
 void *nphfuse_init(struct fuse_conn_info *conn)
 {
+    fprintf(stdout,"init\n");
     log_msg("\nnphfuse_init()\n");
     log_conn(conn);
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
     log_msg("NPHFS_DATA->device_name %s/n", NPHFS_DATA->device_name);
 
-    root = (struct file_struct *) malloc(sizeof(struct file_struct));
+    /*root = (struct file_struct *) malloc(sizeof(struct file_struct));
     fprintf(stdout, "After Malloc!\n");
     strcpy(root->file_name, NPHFS_DATA->device_name);
     strcpy(root->file_path, NPHFS_DATA->device_name);
@@ -488,7 +489,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
-    log_msg("\nroot dir initialized\n");
+    log_msg("\nroot dir initialized\n");*/
 
     return NPHFS_DATA;
 }
