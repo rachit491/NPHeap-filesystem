@@ -112,7 +112,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
     nphfuse_fullpath(fpath, path);
 
-    xyz->file_name = path;
+    sprintf(xyz->file_name, path);
     xyz->is_directory = true;
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir->st_ino, sizeof(struct file_struct));
