@@ -167,7 +167,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node = (struct file_struct*)malloc(sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
-    strcpy(parent_path, NPHFS_DATA->device_name);
+    strcpy(parent_path, NPHFS_DATA->rootdir);
     strncat(parent_path, dir_name , PATH_MAX);
 
     struct file_struct *parent_node = retreive_node(parent_path);
