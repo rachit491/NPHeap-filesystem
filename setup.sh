@@ -1,14 +1,13 @@
-fusermount -u ~/mnt
-sudo rm -rf ~/mnt
+fusermount -u src/mount
+rm -rf src/mount src/NPHeapFS.log src/nphfuse
 sudo rmmod npheap.ko
 
 ./configure
 make
 sudo make install
 
-cd src
-sudo insmod npheap.ko
+#cd src
+sudo insmod src/npheap.ko
 sudo chmod 777 /dev/npheap
 
-sudo mkdir ~/mnt
-sudo nphfuse /dev/npheap ~/mnt
+mkdir src/mount
