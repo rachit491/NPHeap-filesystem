@@ -47,14 +47,18 @@ static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 
 int nphfuse_getattr(const char *path, struct stat *stbuf)
 {
+    log_msg("\nnphfuse_getattr(path=\"%s\", statbuf=0x%08x)\n", path, stbuf);
     if(strlen(path) > PATH_MAX) {
       return -ENOENT;
     }
 
-    char *mapped_data = (char *)npheap_alloc(NPHFS_DATA->devfd, root->offset, npheap_getsize(
-      NPHFS_DATA->devfd, root->offset));
+    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, root->offset, 
+      npheap_getsize(NPHFS_DATA->devfd, root->offset));
 
+    log_msg("mapped_data found\n");
     stbuf = mapped_data->dir_struct;
+
+    log_msg("mapped_data set to stbuf\n");
 
     return 0;
 }
@@ -475,18 +479,16 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->dir_struct->st_uid = 0;
     root->dir_struct->st_gid = 0;
     
-    //change the time
     root->dir_struct->st_atime = time(NULL);
     root->dir_struct->st_mtime = time(NULL);
     root->dir_struct->st_ctime = time(NULL);
     
-    //set the links
     root->next = NULL;
     root->parent = NULL;
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
-        
+    log_msg("\nroot dir initialized\n");
     return NPHFS_DATA;
 }
 

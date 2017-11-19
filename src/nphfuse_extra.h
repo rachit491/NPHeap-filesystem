@@ -8,7 +8,6 @@
 */
 
 #include <time.h>
-#include <sys/types.h>
 #include <stdbool.h>
 #include <sys/stat.h>
 
@@ -19,7 +18,7 @@ struct nphfuse_state {
 };
 
 struct file_struct {
-    __u64 offset;
+    int offset;
     char *file_name;
     char *file_path;
     struct stat *dir_struct;
