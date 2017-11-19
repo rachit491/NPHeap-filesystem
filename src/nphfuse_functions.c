@@ -56,7 +56,15 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
       npheap_getsize(NPHFS_DATA->devfd, root->offset));
 
     log_msg("mapped_data found\n");
-    stbuf = mapped_data->dir_struct;
+    //stbuf = mapped_data->dir_struct;
+	    stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
+            stbuf->st_atime = mapped_data->dir_struct->st_atime;
+            stbuf->st_mtime = mapped_data->dir_struct->st_mtime;
+            stbuf->st_mode = mapped_data->dir_struct->st_mode;
+            stbuf->st_nlink = mapped_data->dir_struct->st_nlink;
+            stbuf->st_uid = mapped_data->dir_struct->st_uid;
+            stbuf->st_gid = mapped_data->dir_struct->st_gid;
+            stbuf->st_size = mapped_data->dir_struct->st_size;
 
     log_msg("mapped_data set to stbuf\n");
 
@@ -467,29 +475,33 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     fprintf(stdout, "Here!\n");
     log_msg("NPHFS_DATA->device_name %s/n", NPHFS_DATA->device_name);
 
-    /*root = (struct file_struct *) malloc(sizeof(struct file_struct));
+    root = (struct file_struct *) malloc(sizeof(struct file_struct));
     fprintf(stdout, "After Malloc!\n");
+    root->file_name = (char *)malloc((strlen(NPHFS_DATA->device_name) + 1)*sizeof(char));
+    root->file_path = (char *)malloc((strlen(NPHFS_DATA->device_name) + 1)*sizeof(char));
     strcpy(root->file_name, NPHFS_DATA->device_name);
+    
     strcpy(root->file_path, NPHFS_DATA->device_name);
     root->is_directory = true;
     root->offset = global_offset++;
-    
+    fprintf(stdout,"before second malloc\n");
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+    fprintf(stdout,"after second malloc\n");
     root->dir_struct->st_mode = 0755 | S_IFDIR;
     root->dir_struct->st_nlink = 2;
     root->dir_struct->st_uid = 0;
     root->dir_struct->st_gid = 0;
-    
+    fprintf(stdout,"before time\n");
     root->dir_struct->st_atime = time(NULL);
     root->dir_struct->st_mtime = time(NULL);
     root->dir_struct->st_ctime = time(NULL);
-    
+    fprintf(stdout,"after time\n");
     root->next = NULL;
     root->parent = NULL;
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
-    log_msg("\nroot dir initialized\n");*/
+    fprintf(stdout,"\nroot dir initialized\n");
 
     return NPHFS_DATA;
 }
