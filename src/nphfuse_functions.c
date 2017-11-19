@@ -93,29 +93,29 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     char fpath[PATH_MAX];
     struct file_struct xyz;
 
-    struct stat new_dir = malloc(sizeof(struct stat));
-    new_dir.st_dev = 64512;
-    new_dir.st_ino = 1701120;
-    new_dir.st_mode = mode;
-    new_dir.st_nlink = 2;
-    new_dir.st_uid = 202360;
-    new_dir.st_gid = 1001;
-    new_dir.st_rdev = 0;
-    new_dir.st_size = 4096;
-    new_dir.st_blksize = 4096;
-    new_dir.st_blocks = 8;
-    new_dir.st_atime = time(NULL);
-    new_dir.st_mtime = time(NULL);
-    new_dir.st_ctime = time(NULL);
+    struct stat *new_dir = malloc(sizeof(struct stat));
+    new_dir->st_dev = 64512;
+    new_dir->st_ino = 1701120;
+    new_dir->st_mode = mode;
+    new_dir->st_nlink = 2;
+    new_dir->st_uid = 202360;
+    new_dir->st_gid = 1001;
+    new_dir->st_rdev = 0;
+    new_dir->st_size = 4096;
+    new_dir->st_blksize = 4096;
+    new_dir->st_blocks = 8;
+    new_dir->st_atime = time(NULL);
+    new_dir->st_mtime = time(NULL);
+    new_dir->st_ctime = time(NULL);
     
     log_msg("\nnphfuse_mkdir(path=\"%s\", mode=0%3o)\n",
       path, mode);
     nphfuse_fullpath(fpath, path);
 
-    xyz.filename = path;
+    xyz.file_name = path;
     xyz.is_directory = true;
 
-    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir.st_ino, sizeof(struct file_struct));
+    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir->st_ino, sizeof(struct file_struct));
     memcpy(mem, xyz, sizeof(struct file_struct));
     return 0;
     //return log_syscall("mkdir", mkdir(fpath, mode), 0);

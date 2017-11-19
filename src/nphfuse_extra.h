@@ -9,6 +9,7 @@
 
 #include <time.h>
 #include <stdbool.h>
+#include <sys/stat.h>
 
 struct nphfuse_state {
     FILE *logfile;
@@ -19,6 +20,6 @@ struct nphfuse_state {
 
 struct file_struct {
 	char *file_name;
-	struct stat new_dir;
+	struct stat *new_dir;
 	bool is_directory;
 };
