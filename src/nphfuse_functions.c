@@ -91,7 +91,7 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
 int nphfuse_mkdir(const char *path, mode_t mode)
 {
     char fpath[PATH_MAX];
-    struct file_struct xyz;
+    struct file_struct *xyz;
 
     struct stat *new_dir = malloc(sizeof(struct stat));
     new_dir->st_dev = 64512;
