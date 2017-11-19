@@ -146,40 +146,61 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
-    strncat(fpath, path, PATH_MAX);
+    strncat(fpath, path , PATH_MAX);
+    
 
     char *base_name, *dir_name;
-    dir_name = dirname(path);
-    base_name = basename(path);
+    char temp[PATH_MAX], temp1[PATH_MAX];
+    strcpy(temp, path);
+    strcpy(temp1, path);
+    dir_name = dirname(temp);
+    base_name = basename(temp1);
 
-    log_msg("dir_name: %s, base_name: %s", dir_name, base_name);
+    log_msg("fpath: %s,dir_name: %s, base_name: %s", fpath, dir_name, base_name);
 
-    /*struct file_struct *curr_node = retreive_node(dir_name);
+    struct file_struct *node = retreive_node(fpath);
 
-    struct file_struct *node;
-    strcpy(node->file_name, path);
+    if(node != NULL){
+      return -1;
+    }
+
+    node = (struct file_struct*)malloc(sizeof(struct file_struct));
+
+    char parent_path[PATH_MAX];
+    strcpy(parent_path, NPHFS_DATA->device_name);
+    strncat(parent_path, dir_name , PATH_MAX);
+
+    struct file_struct *parent_node = retreive_node(parent_path);
+    if(parent_node == NULL){
+      log_msg("\n node is null\n");
+      return -1;
+    }
+
+    strcpy(node->file_name, base_name);
     strcpy(node->file_path, fpath);
     node->is_directory = true;
     node->offset = global_offset++;
     
     node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
-    node->dir_struct->st_dev = 64512;
-    node->dir_struct->st_ino = 1701120;
+    node->dir_struct->st_dev = NPHFS_DATA->devfd;
+    node->dir_struct->st_ino = node->offset;
     node->dir_struct->st_mode = mode;
     node->dir_struct->st_nlink = 2;
-    node->dir_struct->st_uid = 202360;
-    node->dir_struct->st_gid = 1001;
+    node->dir_struct->st_uid = getuid();
+    node->dir_struct->st_gid = getgid();
     node->dir_struct->st_rdev = 0;
-    node->dir_struct->st_size = 4096;
-    node->dir_struct->st_blksize = 4096;
-    node->dir_struct->st_blocks = 8;
+    node->dir_struct->st_size = 0;
+    node->dir_struct->st_blksize = 0;
+    node->dir_struct->st_blocks = 0;
     node->dir_struct->st_atime = time(NULL);
     node->dir_struct->st_mtime = time(NULL);
     node->dir_struct->st_ctime = time(NULL);
 
+    parent_node->next = node;
+    node->parent = parent_node;
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
-    memcpy(mem, xyz, sizeof(struct file_struct));*/
+    memcpy(mem, node, sizeof(struct file_struct));
     return 0;
 }
 
@@ -514,7 +535,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     
-    strcpy(root->file_name, NPHFS_DATA->device_name);
+    strcpy(root->file_name, "/");
     strcpy(root->file_path, fpath);
     root->is_directory = true;
     root->offset = global_offset++;
