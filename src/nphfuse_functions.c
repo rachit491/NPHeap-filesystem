@@ -34,12 +34,12 @@
 
 static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 {
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX); 
     // ridiculously long paths will break here
 
     fprintf(stdout, "nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
-      NPHFS_DATA->rootdir, path, fpath);
+      NPHFS_DATA->device_name, path, fpath);
 }
 
 
@@ -112,8 +112,8 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
     nphfuse_fullpath(fpath, path);
 
-    xyz.file_name = path;
-    xyz.is_directory = true;
+    xyz->file_name = path;
+    xyz->is_directory = true;
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir->st_ino, sizeof(struct file_struct));
     memcpy(mem, xyz, sizeof(struct file_struct));

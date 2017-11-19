@@ -1,5 +1,5 @@
 fusermount -u ~/mnt
-rm -rf ~/mnt
+sudo rm -rf ~/mnt
 sudo rmmod npheap.ko
 
 ./configure
@@ -10,5 +10,5 @@ cd src
 sudo insmod npheap.ko
 sudo chmod 777 /dev/npheap
 
-mkdir ~/mnt
-nphfuse /dev/npheap ~/mnt
+sudo mkdir ~/mnt
+sudo nphfuse /dev/npheap ~/mnt
