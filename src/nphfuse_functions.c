@@ -530,6 +530,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
+    NPHFS_DATA->rootdir = (char *)malloc(sizeof(char)+sizeof(char));
     strcpy(NPHFS_DATA->rootdir, "/");
 
     char fpath[PATH_MAX];
