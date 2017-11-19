@@ -21,6 +21,23 @@
 #include <npheap.h>
 
 int global_offset = 0;
+
+static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
+  if(root == NULL) {
+    return NULL;
+  }
+
+  struct file_struct *tmp = root;
+  while(tmp) {
+    if(strcmp(tmp->file_path, fpath) == 0) {
+      return tmp;
+    } 
+    tmp = tmp->next;
+  }
+
+  return NULL;
+}
+
 ///////////////////////////////////////////////////////////
 //
 // Prototypes for all these functions, and the C-style comments,
@@ -52,19 +69,31 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
       return -ENOENT;
     }
 
-    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, root->offset, 
-      npheap_getsize(NPHFS_DATA->devfd, root->offset));
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX); 
+
+    struct file_struct *node = retreive_node(fpath);
+    if(node == NULL) {
+      return -ENOENT;
+    }
+    
+    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+      npheap_getsize(NPHFS_DATA->devfd, node->offset));
+    if(mapped_data == NULL) {
+      return -ENOENT;
+    }
 
     log_msg("mapped_data found\n");
-    //stbuf = mapped_data->dir_struct;
-	    stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
-            stbuf->st_atime = mapped_data->dir_struct->st_atime;
-            stbuf->st_mtime = mapped_data->dir_struct->st_mtime;
-            stbuf->st_mode = mapped_data->dir_struct->st_mode;
-            stbuf->st_nlink = mapped_data->dir_struct->st_nlink;
-            stbuf->st_uid = mapped_data->dir_struct->st_uid;
-            stbuf->st_gid = mapped_data->dir_struct->st_gid;
-            stbuf->st_size = mapped_data->dir_struct->st_size;
+
+    stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
+    stbuf->st_atime = mapped_data->dir_struct->st_atime;
+    stbuf->st_mtime = mapped_data->dir_struct->st_mtime;
+    stbuf->st_mode  = mapped_data->dir_struct->st_mode;
+    stbuf->st_nlink = mapped_data->dir_struct->st_nlink;
+    stbuf->st_uid   = mapped_data->dir_struct->st_uid;
+    stbuf->st_gid   = mapped_data->dir_struct->st_gid;
+    stbuf->st_size  = mapped_data->dir_struct->st_size;
 
     log_msg("mapped_data set to stbuf\n");
 
@@ -477,10 +506,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     fprintf(stdout, "After Malloc!\n");
-    root->file_name = (char *)malloc((strlen(NPHFS_DATA->device_name) + 1)*sizeof(char));
-    root->file_path = (char *)malloc((strlen(NPHFS_DATA->device_name) + 1)*sizeof(char));
     strcpy(root->file_name, NPHFS_DATA->device_name);
-    
     strcpy(root->file_path, NPHFS_DATA->device_name);
     root->is_directory = true;
     root->offset = global_offset++;

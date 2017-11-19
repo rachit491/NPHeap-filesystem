@@ -19,8 +19,8 @@ struct nphfuse_state {
 
 struct file_struct {
     int offset;
-    char *file_name;
-    char *file_path;
+    char file_name[NAME_MAX];
+    char file_path[PATH_MAX];
     struct stat *dir_struct;
     bool is_directory;
     struct file_struct *parent;
