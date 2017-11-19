@@ -101,6 +101,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     stbuf->st_blksize = mapped_data->dir_struct->st_blksize;
     stbuf->st_blocks = mapped_data->dir_struct->st_blocks;
     stbuf->st_dev   = mapped_data->dir_struct->st_dev;     /* ID of device containing file */
+    stbuf->st_rdev  = mapped_data->dir_struct->st_rdev;
     stbuf->st_ino   = mapped_data->dir_struct->st_ino;     /* i_node no, here offset */
 
     log_msg("mapped_data set to stbuf\n");
@@ -527,10 +528,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
     
-    root->dir_struct->st_mode = 0755 | S_IFDIR;
+    root->dir_struct->st_mode = S_IFDIR | 0755;
     root->dir_struct->st_nlink = 2;
-    root->dir_struct->st_uid = 0;
-    root->dir_struct->st_gid = 0;
+    root->dir_struct->st_uid = getuid();
+    root->dir_struct->st_gid = getgid();
 
     root->dir_struct->st_dev = NPHFS_DATA->devfd;
     root->dir_struct->st_ino = root->offset;
@@ -538,6 +539,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     root->dir_struct->st_blksize = 0;
     root->dir_struct->st_blocks = 0;
+    root->dir_struct->st_rdev = 0;
 
     root->dir_struct->st_atime = time(NULL);
     root->dir_struct->st_mtime = time(NULL);
