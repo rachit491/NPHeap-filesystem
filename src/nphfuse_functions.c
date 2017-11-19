@@ -31,6 +31,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
 
   struct file_struct *tmp = root;
   while(tmp) {
+    log_msg("\n path is %S %S\n",tmp->file_path,fpath);
     if(strcmp(tmp->file_path, fpath) == 0) {
       return tmp;
     } 
