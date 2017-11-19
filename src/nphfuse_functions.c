@@ -49,7 +49,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     char fpath[PATH_MAX];
     int retstat;
     
-    log_msg("\nnphfuse1_getattr(path=\"%s\", stbuf=0x%08x)\n",
+    log_msg("\nnphfuse_getattr(path=\"%s\", stbuf=0x%08x)\n",
     path, stbuf);
     //nphfuse_fullpath(fpath, path);
     strcpy(fpath, NPHFS_DATA->device_name);
@@ -467,6 +467,8 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_msg("\nnphfuse_init()\n");
     log_conn(conn);
     log_fuse_context(fuse_get_context());
+
+    log_msg("NPHFS_DATA->device_name %s/n",NPHFS_DATA->device_name);
         
     return NPHFS_DATA;
 }
