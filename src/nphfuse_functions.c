@@ -31,7 +31,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
 
   struct file_struct *tmp = root;
   while(tmp) {
-    log_msg("\n path is %S %S\n",tmp->file_path,fpath);
+    log_msg("\n path is %s %s\n",tmp->file_path,fpath);
     if(strcmp(tmp->file_path, fpath) == 0) {
       return tmp;
     } 
@@ -511,7 +511,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     fprintf(stdout, "After Malloc!\n");
     strcpy(root->file_name, NPHFS_DATA->device_name);
-    strcpy(root->file_path, NPHFS_DATA->device_name);
+    strcpy(root->file_path, NPHFS_DATA->device_name+'/');
     root->is_directory = true;
     root->offset = global_offset++;
     fprintf(stdout,"before second malloc\n");
