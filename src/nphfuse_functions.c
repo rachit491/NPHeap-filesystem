@@ -34,12 +34,12 @@
 
 static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 {
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path, PATH_MAX); 
     // ridiculously long paths will break here
 
-    fprintf(stdout, "nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
-      NPHFS_DATA->device_name, path, fpath);
+    log_msg("nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
+      NPHFS_DATA->rootdir, path, fpath);
 }
 
 
