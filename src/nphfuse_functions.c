@@ -34,12 +34,13 @@
 
 static void nphfuse_fullpath(char fpath[PATH_MAX], const char *path)
 {
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    log_msg("nphfuse_fullpath");
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX); 
     // ridiculously long paths will break here
 
     log_msg("nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
-      NPHFS_DATA->rootdir, path, fpath);
+      NPHFS_DATA->device_name, path, fpath);
 }
 
 
@@ -48,9 +49,15 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     char fpath[PATH_MAX];
     int retstat;
     
-    log_msg("\nnphfuse_getattr(path=\"%s\", stbuf=0x%08x)\n",
+    log_msg("\nnphfuse1_getattr(path=\"%s\", stbuf=0x%08x)\n",
     path, stbuf);
-    nphfuse_fullpath(fpath, path);
+    //nphfuse_fullpath(fpath, path);
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX); 
+    // ridiculously long paths will break here
+
+    log_msg("nphfuse_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
+      NPHFS_DATA->device_name, path, fpath);
 
     retstat = log_syscall("lstat", lstat(fpath, stbuf), 0);
     
