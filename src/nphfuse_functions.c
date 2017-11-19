@@ -531,11 +531,11 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
     NPHFS_DATA->rootdir = (char *)malloc(sizeof(char)+sizeof(char));
-    strcpy(NPHFS_DATA->rootdir, "/");
+    strcpy(NPHFS_DATA->rootdir, "");
 
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->rootdir);
-    //strncat(fpath, "/", PATH_MAX);
+    strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
     
