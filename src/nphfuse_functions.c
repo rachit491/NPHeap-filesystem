@@ -98,8 +98,14 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     stbuf->st_uid   = mapped_data->dir_struct->st_uid;
     stbuf->st_gid   = mapped_data->dir_struct->st_gid;
     stbuf->st_size  = mapped_data->dir_struct->st_size;
+    stbuf->st_blksize = mapped_data->dir_struct->st_blksize;
+    stbuf->st_blocks = mapped_data->dir_struct->st_blocks;
+    stbuf->st_dev   = mapped_data->dir_struct->st_dev;     /* ID of device containing file */
+    stbuf->st_ino   = mapped_data->dir_struct->st_ino;     /* i_node no, here offset */
 
     log_msg("mapped_data set to stbuf\n");
+
+    log_stat(stbuf);
 
     return 0;
 }
@@ -508,24 +514,35 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     fprintf(stdout, "Here!\n");
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, "/", PATH_MAX);
+
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
-    fprintf(stdout, "After Malloc!\n");
+    
     strcpy(root->file_name, NPHFS_DATA->device_name);
-    strcpy(root->file_path, NPHFS_DATA->device_name+'/');
+    strcpy(root->file_path, fpath);
     root->is_directory = true;
     root->offset = global_offset++;
-    fprintf(stdout,"before second malloc\n");
+    
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
-    fprintf(stdout,"after second malloc\n");
+    
     root->dir_struct->st_mode = 0755 | S_IFDIR;
     root->dir_struct->st_nlink = 2;
     root->dir_struct->st_uid = 0;
     root->dir_struct->st_gid = 0;
-    fprintf(stdout,"before time\n");
+
+    root->dir_struct->st_dev = NPHFS_DATA->devfd;
+    root->dir_struct->st_ino = root->offset;
+    root->dir_struct->st_size = 0;
+
+    root->dir_struct->st_blksize = 0;
+    root->dir_struct->st_blocks = 0;
+
     root->dir_struct->st_atime = time(NULL);
     root->dir_struct->st_mtime = time(NULL);
     root->dir_struct->st_ctime = time(NULL);
-    fprintf(stdout,"after time\n");
+    
     root->next = NULL;
     root->parent = NULL;
 
