@@ -20,7 +20,7 @@
 #include "nphfuse.h"
 #include <npheap.h>
 
-int global_offset = 0;
+int global_offset = 10202;
 
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   log_msg("\nretreive_node\n");
@@ -141,35 +141,46 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
 /** Create a directory */
 int nphfuse_mkdir(const char *path, mode_t mode)
 {
-    char fpath[PATH_MAX];
-    struct file_struct *xyz;
-
-    struct stat *new_dir = malloc(sizeof(struct stat));
-    new_dir->st_dev = 64512;
-    new_dir->st_ino = 1701120;
-    new_dir->st_mode = mode;
-    new_dir->st_nlink = 2;
-    new_dir->st_uid = 202360;
-    new_dir->st_gid = 1001;
-    new_dir->st_rdev = 0;
-    new_dir->st_size = 4096;
-    new_dir->st_blksize = 4096;
-    new_dir->st_blocks = 8;
-    new_dir->st_atime = time(NULL);
-    new_dir->st_mtime = time(NULL);
-    new_dir->st_ctime = time(NULL);
-    
     log_msg("\nnphfuse_mkdir(path=\"%s\", mode=0%3o)\n",
       path, mode);
-    nphfuse_fullpath(fpath, path);
 
-    sprintf(xyz->file_name, path);
-    xyz->is_directory = true;
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
 
-    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, new_dir->st_ino, sizeof(struct file_struct));
-    memcpy(mem, xyz, sizeof(struct file_struct));
+    char *base_name, *dir_name;
+    dir_name = dirname(path);
+    base_name = basename(path);
+
+    log_msg("dir_name: %s, base_name: %s", dir_name, base_name);
+
+    /*struct file_struct *curr_node = retreive_node(dir_name);
+
+    struct file_struct *node;
+    strcpy(node->file_name, path);
+    strcpy(node->file_path, fpath);
+    node->is_directory = true;
+    node->offset = global_offset++;
+    
+    node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+    node->dir_struct->st_dev = 64512;
+    node->dir_struct->st_ino = 1701120;
+    node->dir_struct->st_mode = mode;
+    node->dir_struct->st_nlink = 2;
+    node->dir_struct->st_uid = 202360;
+    node->dir_struct->st_gid = 1001;
+    node->dir_struct->st_rdev = 0;
+    node->dir_struct->st_size = 4096;
+    node->dir_struct->st_blksize = 4096;
+    node->dir_struct->st_blocks = 8;
+    node->dir_struct->st_atime = time(NULL);
+    node->dir_struct->st_mtime = time(NULL);
+    node->dir_struct->st_ctime = time(NULL);
+
+
+    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
+    memcpy(mem, xyz, sizeof(struct file_struct));*/
     return 0;
-    //return log_syscall("mkdir", mkdir(fpath, mode), 0);
 }
 
 /** Remove a file */
@@ -365,32 +376,14 @@ int nphfuse_fsync(const char *path, int datasync, struct fuse_file_info *fi)
 /** Set extended attributes */
 int nphfuse_setxattr(const char *path, const char *name, const char *value, size_t size, int flags)
 {
-    char fpath[PATH_MAX];
-    
-    fprintf(stdout,"\nnphfuse_setxattr(path=\"%s\", name=\"%s\", value=\"%s\", size=%d, flags=0x%08x)\n",
-      path, name, value, size, flags);
-    nphfuse_fullpath(fpath, path);
-
-    return log_syscall("lsetxattr", lsetxattr(fpath, name, value, size, flags), 0);
-    //return -61;
+    return -61;
 }
 
 /** Get extended attributes */
 int nphfuse_getxattr(const char *path, const char *name, char *value, size_t size)
 {
-    int retstat = 0;
-    char fpath[PATH_MAX];
     
-    fprintf(stdout,"\nnphfuse_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
-      path, name, value, size);
-    nphfuse_fullpath(fpath, path);
-
-    retstat = log_syscall("lgetxattr", lgetxattr(fpath, name, value, size), 0);
-    if (retstat >= 0)
-      fprintf(stdout,"    value = \"%s\"\n", value);
-    
-    return retstat;
-//    return -61;
+    return -61;
 }
 
 /** List extended attributes */
