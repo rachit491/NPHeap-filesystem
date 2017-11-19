@@ -73,7 +73,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     }
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX); 
 
     struct file_struct *node = retreive_node(fpath);
@@ -145,7 +145,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path , PATH_MAX);
     
 
@@ -167,7 +167,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node = (struct file_struct*)malloc(sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
-    strcpy(parent_path, NPHFS_DATA->rootdir);
+    strcpy(parent_path, NPHFS_DATA->device_name);
     strncat(parent_path, dir_name , PATH_MAX);
 
     struct file_struct *parent_node = retreive_node(parent_path);
@@ -311,7 +311,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
  *
  */
 int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
-	     struct fuse_file_info *fi)
+       struct fuse_file_info *fi)
 {
     return -ENOENT;
 }
@@ -358,7 +358,7 @@ int nphfuse_flush(const char *path, struct fuse_file_info *fi)
     log_msg("\nnphfuse_flush(path=\"%s\", fi=0x%08x)\n", path, fi);
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
-	
+  
     return 0;
 }
 
@@ -455,7 +455,7 @@ int nphfuse_opendir(const char *path, struct fuse_file_info *fi)
  */
 
 int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
-	       struct fuse_file_info *fi)
+         struct fuse_file_info *fi)
 {
     return -ENOENT;
 }
@@ -527,14 +527,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_conn(conn);
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
-    
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
 
-    NPHFS_DATA->rootdir = (char *)malloc(sizeof(char)+sizeof(char));
-    strcpy(NPHFS_DATA->rootdir, "");
-
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
