@@ -73,7 +73,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     }
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX); 
 
     struct file_struct *node = retreive_node(fpath);
@@ -147,7 +147,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path , PATH_MAX);
     
 
@@ -169,7 +169,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node = (struct file_struct*)malloc(sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
-    strcpy(parent_path, NPHFS_DATA->rootdir);
+    strcpy(parent_path, NPHFS_DATA->device_name);
     strncat(parent_path, dir_name , PATH_MAX);
 
     struct file_struct *parent_node = retreive_node(parent_path);
@@ -530,10 +530,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
-    NPHFS_DATA->rootdir = (char*)malloc(sizeof(char));
-    strcpy(NPHFS_DATA->rootdir, "");
+    //NPHFS_DATA->rootdir = (char*)malloc(sizeof(char));
+    //strcpy(NPHFS_DATA->rootdir, "");
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->rootdir);
+    strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
@@ -545,17 +545,17 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
     
-    root->dir_struct->st_mode = S_IFDIR | 0755;
-    root->dir_struct->st_nlink = 2;
-    root->dir_struct->st_uid = getuid();
-    root->dir_struct->st_gid = getgid();
+    root->dir_struct->st_mode = 040755;
+    root->dir_struct->st_nlink = 25;
+    root->dir_struct->st_uid = 0;
+    root->dir_struct->st_gid = 0;
 
     root->dir_struct->st_dev = NPHFS_DATA->devfd;
     root->dir_struct->st_ino = root->offset;
-    root->dir_struct->st_size = 0;
+    root->dir_struct->st_size = 4096;
 
-    root->dir_struct->st_blksize = 0;
-    root->dir_struct->st_blocks = 0;
+    root->dir_struct->st_blksize = 4096;
+    root->dir_struct->st_blocks = 8;
     root->dir_struct->st_rdev = 0;
 
     root->dir_struct->st_atime = time(NULL);
