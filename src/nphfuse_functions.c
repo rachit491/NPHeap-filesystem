@@ -73,7 +73,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     }
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path, PATH_MAX); 
 
     struct file_struct *node = retreive_node(fpath);
@@ -105,10 +105,12 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
     stbuf->st_ino   = mapped_data->dir_struct->st_ino;     /* i_node no, here offset */
 
     log_msg("mapped_data set to stbuf\n");
+    
+    int retstat = log_syscall("lstat", lstat(fpath, stbuf), 0);
 
     log_stat(stbuf);
 
-    return 0;
+    return retstat;
 }
 
 /** Read the target of a symbolic link
@@ -145,7 +147,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       path, mode);
 
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, path , PATH_MAX);
     
 
@@ -167,7 +169,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node = (struct file_struct*)malloc(sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
-    strcpy(parent_path, NPHFS_DATA->device_name);
+    strcpy(parent_path, NPHFS_DATA->rootdir);
     strncat(parent_path, dir_name , PATH_MAX);
 
     struct file_struct *parent_node = retreive_node(parent_path);
@@ -201,7 +203,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
     memcpy(mem, node, sizeof(struct file_struct));
-    return 0;
+    return log_syscall("mkdir", mkdir(fpath, mode), 0);
 }
 
 /** Remove a file */
@@ -528,9 +530,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     log_fuse_context(fuse_get_context());
     fprintf(stdout, "Here!\n");
     log_msg("NPHFS_DATA->device_name %s\n", NPHFS_DATA->device_name);
-
+    NPHFS_DATA->rootdir = (char*)malloc(sizeof(char));
+    strcpy(NPHFS_DATA->rootdir, "");
     char fpath[PATH_MAX];
-    strcpy(fpath, NPHFS_DATA->device_name);
+    strcpy(fpath, NPHFS_DATA->rootdir);
     strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
