@@ -182,6 +182,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     strcpy(node->file_name, base_name);
     strcpy(node->file_path, fpath);
+
     node->is_directory = true;
     node->offset = global_offset++;
     
@@ -215,6 +216,17 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     node->dirents = dir_names;
     node->dirent_size = dir_size;
+
+    for(int i = 0; i < dir_size; i++){
+      node->dirents[i].d_ino = -1;
+    }
+
+    for(int j =0; j < parent_node->dirent_size; j++){
+      if(parent_node->dirents[j].d_ino!=-1){
+        parent_node->dirents[j].d_ino = node->offset;
+        strcpy(parent_node->dirents[j].d_name,node->file_name);
+      }
+    }
 
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
@@ -516,14 +528,17 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     if (node == NULL) 
         return -ENOENT;
 
-    for(int i = 0; node->dirent_size; i++){
-      filler(buf,node->dirents[i].d_name, NULL, 0);
+    for(int i = 0; i < node->dirent_size; i++){
+      if(root->dirents[i].d_ino != -1){
+          log_msg("\nfound sub dir\n");
+          filler(buf,root->dirents[i].d_name, NULL, 0);
+      }
     }
 
     time_t curr_time;
     time(&curr_time);
     node->dir_struct->st_atime = curr_time;
-
+    log_msg("\ndir read\n");
     return 0;
 }
 
@@ -611,7 +626,9 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->offset = global_offset++;
     
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+
     memset(root->dir_struct, 0 ,sizeof(struct stat));
+
     root->dir_struct->st_mode = S_IFDIR | 0755;
     root->dir_struct->st_nlink = 2;
     root->dir_struct->st_uid = getuid();
@@ -643,6 +660,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     root->dirents = dir_names;
     root->dirent_size = dir_size;
+
+    for(int i = 0; i < dir_size; i++){
+      root->dirents[i].d_ino = -1;
+    }
 
     memcpy(mem, root, sizeof(struct file_struct));
     fprintf(stdout,"\nroot dir initialized\n");
