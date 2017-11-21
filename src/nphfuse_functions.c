@@ -517,7 +517,7 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
         return -ENOENT;
 
     for(int i = 0; node->dirents!=NULL; i++){
-      filler(buf,node->dirents[i]->d_name, NULL, 0);
+      filler(buf,node->dirents[i].d_name, NULL, 0);
     }
 
     time_t curr_time;
