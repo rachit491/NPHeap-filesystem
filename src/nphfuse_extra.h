@@ -27,5 +27,5 @@ struct file_struct {
     bool is_directory;
     struct file_struct *parent;
     struct file_struct *next;
-    struct dirent *dir;
+    struct dirent dirents[];
 }*root;
