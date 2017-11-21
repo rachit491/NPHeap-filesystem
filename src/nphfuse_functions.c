@@ -90,19 +90,21 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
 
     log_msg("\nmapped_data found\n");
 
-    stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
+    /*stbuf->st_ctime = mapped_data->dir_struct->st_ctime;
     stbuf->st_atime = mapped_data->dir_struct->st_atime;
     stbuf->st_mtime = mapped_data->dir_struct->st_mtime;
     stbuf->st_mode  = mapped_data->dir_struct->st_mode;
     stbuf->st_nlink = mapped_data->dir_struct->st_nlink;
     stbuf->st_uid   = mapped_data->dir_struct->st_uid;
     stbuf->st_gid   = mapped_data->dir_struct->st_gid;
-    stbuf->st_size  = mapped_data->dir_struct->st_size;
-    stbuf->st_blksize = mapped_data->dir_struct->st_blksize;
+    stbuf->st_size  = mapped_data->dir_struct->st_size;*/
+    memset(stbuf, 0 ,sizeof(struct stat));
+    memcpy(stbuf, mapped_data->dir_struct, sizeof(struct stat));
+    /*stbuf->st_blksize = mapped_data->dir_struct->st_blksize;
     stbuf->st_blocks = mapped_data->dir_struct->st_blocks;
-    stbuf->st_dev   = mapped_data->dir_struct->st_dev;     /* ID of device containing file */
+    stbuf->st_dev   = mapped_data->dir_struct->st_dev;     // ID of device containing file
     stbuf->st_rdev  = mapped_data->dir_struct->st_rdev;
-    stbuf->st_ino   = mapped_data->dir_struct->st_ino;     /* i_node no, here offset */
+    stbuf->st_ino   = mapped_data->dir_struct->st_ino;*/     /* i_node no, here offset */
 
     log_msg("mapped_data set to stbuf\n");
     
@@ -110,7 +112,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
 
     log_stat(stbuf);
 
-    return retstat;
+    return 0;
 }
 
 /** Read the target of a symbolic link
@@ -184,16 +186,16 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->offset = global_offset++;
     
     node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
-    node->dir_struct->st_dev = NPHFS_DATA->devfd;
-    node->dir_struct->st_ino = node->offset;
+    /*node->dir_struct->st_dev = NPHFS_DATA->devfd;
+    node->dir_struct->st_ino = node->offset;*/
     node->dir_struct->st_mode = mode;
     node->dir_struct->st_nlink = 2;
     node->dir_struct->st_uid = getuid();
     node->dir_struct->st_gid = getgid();
-    node->dir_struct->st_rdev = 0;
+    //node->dir_struct->st_rdev = 0;
     node->dir_struct->st_size = 0;
-    node->dir_struct->st_blksize = 0;
-    node->dir_struct->st_blocks = 0;
+    /*node->dir_struct->st_blksize = 0;
+    node->dir_struct->st_blocks = 0;*/
     node->dir_struct->st_atime = time(NULL);
     node->dir_struct->st_mtime = time(NULL);
     node->dir_struct->st_ctime = time(NULL);
@@ -203,7 +205,9 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
     memcpy(mem, node, sizeof(struct file_struct));
-    return log_syscall("mkdir", mkdir(fpath, mode), 0);
+    log_syscall("mkdir", mkdir(fpath, mode), 0);
+
+    return 0;
 }
 
 /** Remove a file */
@@ -537,25 +541,28 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     strncat(fpath, "/", PATH_MAX);
 
     root = (struct file_struct *) malloc(sizeof(struct file_struct));
+    memset(root, 0 ,sizeof(struct file_struct));
     
     strcpy(root->file_name, "/");
     strcpy(root->file_path, fpath);
+
     root->is_directory = true;
     root->offset = global_offset++;
     
     root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
-    
-    root->dir_struct->st_mode = 040755;
-    root->dir_struct->st_nlink = 25;
-    root->dir_struct->st_uid = 0;
-    root->dir_struct->st_gid = 0;
+    memset(root->dir_struct, 0 ,sizeof(struct stat));
+    root->dir_struct->st_mode = S_IFDIR | 0755;
+    root->dir_struct->st_nlink = 2;
+    root->dir_struct->st_uid = getuid();
+    root->dir_struct->st_gid = getgid();
 
     root->dir_struct->st_dev = NPHFS_DATA->devfd;
     root->dir_struct->st_ino = root->offset;
-    root->dir_struct->st_size = 4096;
+    root->dir_struct->st_size = 0;
 
-    root->dir_struct->st_blksize = 4096;
-    root->dir_struct->st_blocks = 8;
+
+    root->dir_struct->st_blksize = 8192;
+    root->dir_struct->st_blocks = 1;
     root->dir_struct->st_rdev = 0;
 
     root->dir_struct->st_atime = time(NULL);
