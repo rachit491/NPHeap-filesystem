@@ -186,26 +186,42 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->offset = global_offset++;
     
     node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
-    /*node->dir_struct->st_dev = NPHFS_DATA->devfd;
-    node->dir_struct->st_ino = node->offset;*/
+
+    node->dir_struct->st_dev = NPHFS_DATA->devfd;
+    node->dir_struct->st_ino = node->offset;
+
     node->dir_struct->st_mode = mode;
     node->dir_struct->st_nlink = 2;
+
     node->dir_struct->st_uid = getuid();
     node->dir_struct->st_gid = getgid();
-    //node->dir_struct->st_rdev = 0;
+    node->dir_struct->st_rdev = 0;
+
     node->dir_struct->st_size = 0;
-    /*node->dir_struct->st_blksize = 0;
-    node->dir_struct->st_blocks = 0;*/
+    node->dir_struct->st_blksize = 8192;
+    node->dir_struct->st_blocks = 1;
+
     node->dir_struct->st_atime = time(NULL);
     node->dir_struct->st_mtime = time(NULL);
     node->dir_struct->st_ctime = time(NULL);
 
+
+
     parent_node->next = node;
     node->parent = parent_node;
 
+    dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
+
+    char dir_names[dir_size/sizeof(struct dirent)];
+
+    node->dir->d_ino = node->offset;
+    node->dir->d_name = dir_names;
+
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
     memcpy(mem, node, sizeof(struct file_struct));
-    log_syscall("mkdir", mkdir(fpath, mode), 0);
+    //log_syscall("mkdir", mkdir(fpath, mode), 0);
+
+    log_msg("\ndir created\n");
 
     return 0;
 }
@@ -437,6 +453,8 @@ int nphfuse_opendir(const char *path, struct fuse_file_info *fi)
 {
 
   // search for path and check if it exists in npheap
+    log_msg("\nnphfuse_opendir(path=\"%s\", fi=0x%08x)\n",path, fi);
+
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path , PATH_MAX);
@@ -451,6 +469,7 @@ int nphfuse_opendir(const char *path, struct fuse_file_info *fi)
       npheap_getsize(NPHFS_DATA->devfd, node->offset));
 
     fi->fh = (intptr_t) mapped_data;
+
     return 0;
 }
 
@@ -479,7 +498,33 @@ int nphfuse_opendir(const char *path, struct fuse_file_info *fi)
 int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
          struct fuse_file_info *fi)
 {
-    return -ENOENT;
+    log_msg("\nnphfuse_readdir(path=\"%s\", buf=0x%08x, filler=0x%08x, offset=%lld, fi=0x%08x)\n",
+      path, buf, filler, offset, fi);
+
+    char fpath[PATH_MAX];
+    if(strlen(path)  > PATH_MAX)
+        return -ENOENT;
+    
+    filler(buf, ".", NULL, 0);
+    filler(buf, "..", NULL, 0);
+
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+    
+    struct file_struct *node = retreive_node(fpath);
+    
+    if (node == NULL) 
+        return -ENOENT;
+
+    for(i = 0; node->dir->d_name[i]!=NULL; i++){
+      filler(buf,node->dir->d_name[i], NULL, 0);
+    }
+
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+
+    return 0;
 }
 
 /** Release directory
@@ -589,6 +634,16 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->parent = NULL;
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
+
+    //calculate size of dirents that can be stored
+
+    dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
+
+    char dir_names[dir_size/sizeof(struct dirent)];
+
+    root->dir->d_ino = root->offset;
+    root->dir->d_name = dir_names;
+
     memcpy(mem, root, sizeof(struct file_struct));
     fprintf(stdout,"\nroot dir initialized\n");
 

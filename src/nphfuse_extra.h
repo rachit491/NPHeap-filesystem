@@ -10,6 +10,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 struct nphfuse_state {
     FILE *logfile;
@@ -26,4 +27,5 @@ struct file_struct {
     bool is_directory;
     struct file_struct *parent;
     struct file_struct *next;
+    struct dirent *dir;
 }*root;
