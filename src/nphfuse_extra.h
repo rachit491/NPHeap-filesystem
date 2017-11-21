@@ -28,4 +28,5 @@ struct file_struct {
     struct file_struct *parent;
     struct file_struct *next;
     struct dirent *dirents;
+    int dirent_size;
 }*root;

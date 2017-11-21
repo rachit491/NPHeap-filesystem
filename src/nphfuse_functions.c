@@ -206,15 +206,15 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->dir_struct->st_ctime = time(NULL);
 
 
-
     parent_node->next = node;
     node->parent = parent_node;
 
     int dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
 
-    struct dirent dir_names[dir_size/sizeof(struct dirent)];
+    struct dirent dir_names[dir_size];
 
     node->dirents = dir_names;
+    node->dirent_size = dir_size;
 
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
@@ -516,7 +516,7 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     if (node == NULL) 
         return -ENOENT;
 
-    for(int i = 0; node->dirents!=NULL; i++){
+    for(int i = 0; node->dirent_size; i++){
       filler(buf,node->dirents[i].d_name, NULL, 0);
     }
 
@@ -639,9 +639,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     int dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
 
-    struct dirent dir_names[dir_size/sizeof(struct dirent)];
+    struct dirent dir_names[dir_size];
 
     root->dirents = dir_names;
+    root->dirent_size = dir_size;
 
     memcpy(mem, root, sizeof(struct file_struct));
     fprintf(stdout,"\nroot dir initialized\n");
