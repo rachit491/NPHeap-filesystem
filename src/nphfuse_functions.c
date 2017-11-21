@@ -218,11 +218,11 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->dirent_size = dir_size;
 
     for(int i = 0; i < dir_size; i++){
-      node->dirents[i].d_ino = -1;
+      node->dirents[i].d_ino = -11;
     }
 
     for(int j =0; j < parent_node->dirent_size; j++){
-      if(parent_node->dirents[j].d_ino!=-1){
+      if(parent_node->dirents[j].d_ino!=-11){
         parent_node->dirents[j].d_ino = node->offset;
         strcpy(parent_node->dirents[j].d_name,node->file_name);
       }
@@ -529,7 +529,7 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
         return -ENOENT;
 
     for(int i = 0; i < node->dirent_size; i++){
-      if(node->dirents[i].d_ino != -1){
+      if(node->dirents[i].d_ino != -11 && strlen(node->dirents[i].d_name)>1){
           log_msg("\nfound sub dir %d %s\n",node->dirents[i].d_ino,node->dirents[i].d_name);
           filler(buf,node->dirents[i].d_name, NULL, 0);
       }
@@ -539,6 +539,7 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     time(&curr_time);
     node->dir_struct->st_atime = curr_time;
     log_msg("\ndir read\n");
+
     return 0;
 }
 
@@ -662,7 +663,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->dirent_size = dir_size;
 
     for(int i = 0; i < dir_size; i++){
-      root->dirents[i].d_ino = -1;
+      root->dirents[i].d_ino = -11;
     }
 
     memcpy(mem, root, sizeof(struct file_struct));
