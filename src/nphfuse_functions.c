@@ -529,9 +529,9 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
         return -ENOENT;
 
     for(int i = 0; i < node->dirent_size; i++){
-      if(root->dirents[i].d_ino != -1){
-          log_msg("\nfound sub dir\n");
-          filler(buf,root->dirents[i].d_name, NULL, 0);
+      if(node->dirents[i].d_ino != -1){
+          log_msg("\nfound sub dir %d %s\n",node->dirents[i].d_ino,node->dirents[i].d_name);
+          filler(buf,node->dirents[i].d_name, NULL, 0);
       }
     }
 
