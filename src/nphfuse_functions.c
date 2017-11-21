@@ -230,6 +230,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
+    memset(mem, 0, sizeof(struct file_struct));
     memcpy(mem, node, sizeof(struct file_struct));
     //log_syscall("mkdir", mkdir(fpath, mode), 0);
 
@@ -531,7 +532,7 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     for(int i = 0; i < node->dirent_size; i++){
       if(node->dirents[i].d_ino != -11 && strlen(node->dirents[i].d_name)>1){
           log_msg("\nfound sub dir %d %s\n",node->dirents[i].d_ino,node->dirents[i].d_name);
-          filler(buf,node->dirents[i].d_name, NULL, 0);
+          //filler(buf,node->dirents[i].d_name, NULL, 0);
       }
     }
 
@@ -665,7 +666,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     for(int i = 0; i < dir_size; i++){
       root->dirents[i].d_ino = -11;
     }
-
+    memset(mem, 0, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
     fprintf(stdout,"\nroot dir initialized\n");
 
