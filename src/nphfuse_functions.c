@@ -435,7 +435,23 @@ int nphfuse_removexattr(const char *path, const char *name)
  */
 int nphfuse_opendir(const char *path, struct fuse_file_info *fi)
 {
-    return -ENOENT;
+
+  // search for path and check if it exists in npheap
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+
+    struct file_struct *node = retreive_node(fpath);
+    if(node == NULL) {
+      log_msg("\nnode not found\n");
+      return -ENOENT;
+    }
+
+    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+      npheap_getsize(NPHFS_DATA->devfd, node->offset));
+
+    fi->fh = (intptr_t) mapped_data;
+    return 0;
 }
 
 /** Read directory
