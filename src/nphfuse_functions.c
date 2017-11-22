@@ -213,7 +213,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->next = directories;
 
     for(int i = 0; i< parent_node->dir_size; i++){
-      struct file_struct next = parent_node->next[i];
+      struct file_struct *next = parent_node->next[i];
       if(next == NULL){
         parent_node->next[i] = *node;
       }
@@ -523,10 +523,9 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
         return -ENOENT;
 
     for(int i = 0; i< node->dir_size; i++){
-      struct file_struct next = node->next[i];
-      if(node->next[i] != NULL){
-        struct file_struct *tmp = node->next[i];
-        filler(buf, tmp.file_name, NULL, 0);
+      struct file_struct *next = node->next[i];
+      if(next != NULL){
+        filler(buf, next->file_name, NULL, 0);
       }
     }
 
