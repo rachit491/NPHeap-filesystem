@@ -215,7 +215,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     for(int i = 0; i< parent_node->dir_size; i++){
       struct file_struct next = parent_node->next[i];
       if(next == NULL){
-        parent_node->directories[i] = *node;
+        parent_node->next[i] = *node;
       }
     }
     
