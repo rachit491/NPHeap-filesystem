@@ -26,7 +26,7 @@ struct file_struct {
     struct stat *dir_struct;
     bool is_directory;
     struct file_struct *parent;
-    struct file_struct **next;
-    struct dirent *dirents;
-    int dir_size;
+    struct file_struct *next;
+    struct file_struct *sibling;
+    bool is_root;
 }*root;

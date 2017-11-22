@@ -23,7 +23,6 @@
 int global_offset = 10202;
 
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
-  int i = 0;
   log_msg("\nretreive_node\n");
   if(root == NULL) {
     log_msg("\n root is null\n");
@@ -31,30 +30,37 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   }
 
   struct file_struct *tmp = root;
-  if(tmp != NULL){
-    log_msg("\n path is %s %s\n",tmp->file_path,fpath);
-    if(strcmp(tmp->file_path, fpath) == 0) {
-      return tmp;
-    }
-    log_msg("\n directory size is %d\n",tmp->dir_size);
-    for(int i = 0; i < tmp->dir_size; i++){
-      log_msg("\n iterating parent to find node\n");
-      struct file_struct *next = tmp->next[i];
-      if(next!=NULL){
-        log_msg("\n path is %s %s\n",next->file_path,fpath);
-        if(strcmp(next->file_path, fpath) == 0) {
-          return next;
+
+  if(tmp->is_root == true){
+      log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+      if(strcmp(tmp->file_path, fpath) == 0) {
+        return tmp;
+      }else if(tmp->next != NULL){
+        tmp = tmp->next;
+        while(tmp){
+          log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+          if(strcmp(tmp->file_path, fpath) == 0) {
+            return tmp;
+          }
         }
+        tmp = tmp->next;  
+      }else if(tmp->next->sibling!=NULL){
+        tmp = tmp->next->sibling;
+        while(tmp){
+          log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+          if(strcmp(tmp->file_path, fpath) == 0) {
+            return tmp;
+        }
+        tmp = tmp->sibling;
       }
-    }
   }
-  /*while(tmp!=NULL) {
+
+  /*while(tmp) {
     log_msg("\n path is %s %s\n",tmp->file_path,fpath);
     if(strcmp(tmp->file_path, fpath) == 0) {
       return tmp;
     } 
-    tmp = tmp->next[i];
-    i++;
+    tmp = tmp->next;
   }*/
 
   return NULL;
@@ -225,25 +231,22 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->dir_struct->st_mtime = time(NULL);
     node->dir_struct->st_ctime = time(NULL);
 
-    int dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
+    node->next = NULL;
+    node->parent = parent_node;
 
-    struct file_struct **directories[dir_size];
-
-    node->next = *directories;
-
-    for(int i = 0; i< parent_node->dir_size; i++){
-      struct file_struct *next = parent_node->next[i];
-      if(next == NULL){
-        memcpy(parent_node->next[i], node, sizeof(struct file_struct));
-        break;
+    struct file_struct *sib = parent_node;
+    
+    if(sib->is_root == true){
+      if(sib->next == NULL){
+        sib->next = node;
+      }else{
+        struct file_node *tmp = sib->next;
+        while(next->sib){
+          next = next->sib;
+        }
+        next->sib = node;
       }
     }
-
-    for(int j = 0; j < dir_size;j++){
-      node->next[j] = NULL;
-    }
-    
-    node->parent = parent_node;
 
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
@@ -546,10 +549,16 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     if (node == NULL) 
         return -ENOENT;
 
-    for(int i = 0; i< node->dir_size; i++){
-      struct file_struct *next = node->next[i];
-      if(next != NULL){
-        filler(buf, next->file_name, NULL, 0);
+    struct file_struct *tmp = node;
+    if(tmp->is_root == true){
+      tmp = tmp->next;
+      while(tmp){
+        filler(buf, tmp->file_name, NULL ,0);
+      }
+      tmp = tmp->sibling;
+      while(tmp){
+        filler(buf,tmp->file_name, NULL, 0);
+        tmp = tmp->sibling;
       }
     }
 
@@ -670,20 +679,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
 
-    //calculate size of dirents that can be stored
-
-    int dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
-    log_msg("/ndir size is %d/n", dir_size);
-    struct file_struct **directories[dir_size];
-
-    root->next = *directories;
-    root->dir_size = dir_size;
-
-    for(int i = 0; i < dir_size;i++){
-      root->next[i] = NULL;
-    }
-
     root->parent = NULL;
+    root->next = NULL;
+    root->sibling = NULL;
+    root->is_root = true;
     
     memset(mem, 0, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
