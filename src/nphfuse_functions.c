@@ -34,17 +34,17 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   if(tmp->is_root == true){
       log_msg("\n path is %s %s\n",tmp->file_path,fpath);
       if(strcmp(tmp->file_path, fpath) == 0) {
-        fprintf(stdout,"\nexit retreive_node\n");
+        log_msg("\nexit retreive_node\n");
         return tmp;
       }else if(tmp->next != NULL){
-        tmp = tmp->next;
-        while(tmp != NULL){
-          fprintf(stdout,"\n path is %s %s\n",tmp->file_path,fpath);
-          if(strcmp(tmp->file_path, fpath) == 0) {
-            fprintf(stdout,"\nexit retreive_node\n");
-            return tmp;
+        struct file_struct *tmp1 = tmp->next;
+        while(tmp1 != NULL){
+          log_msg("\n path is %s %s\n",tmp1->file_path,fpath);
+          if(strcmp(tmp1->file_path, fpath) == 0) {
+            log_msg("\nexit retreive_node\n");
+            return tmp1;
           }else{
-            tmp = tmp->next;
+            tmp1 = tmp1->next;
           }
         }
       }else if(tmp->next!=NULL && tmp->next->sibling!=NULL){
@@ -52,7 +52,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
         while(tmp != NULL){
           fprintf(stdout,"\n path is %s %s\n",tmp->file_path,fpath);
           if(strcmp(tmp->file_path, fpath) == 0) {
-            fprintf(stdout,"\nexit retreive_node\n");
+            log_msg("\nexit retreive_node\n");
             return tmp;
         }else{
           tmp = tmp->sibling;
@@ -244,12 +244,14 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     
     if(sib->is_root == true){
       if(sib->next == NULL){
+        log_msg("\n root next is null, assigned now\n");
         sib->next = node;
       }else{
         struct file_struct *tmp = sib->next;
         while(tmp->sibling != NULL){
           tmp = tmp->sibling;
         }
+        log_msg("\n root next sibling is null, assigned now\n");
         tmp->sibling = node;
       }
     }
