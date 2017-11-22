@@ -23,6 +23,7 @@
 int global_offset = 10202;
 
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
+  int i = 0;
   log_msg("\nretreive_node\n");
   if(root == NULL) {
     log_msg("\n root is null\n");
@@ -30,13 +31,31 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   }
 
   struct file_struct *tmp = root;
-  while(tmp) {
+  if(tmp != NULL){
+    log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+    if(strcmp(tmp->file_path, fpath) == 0) {
+      return tmp;
+    }
+    log_msg("\n directory size is %d\n",tmp->dir_size);
+    for(int i = 0; i < tmp->dir_size; i++){
+      log_msg("\n iterating parent to find node\n");
+      struct file_struct *next = tmp->next[i];
+      if(next!=NULL){
+        log_msg("\n path is %s %s\n",next->file_path,fpath);
+        if(strcmp(next->file_path, fpath) == 0) {
+          return next;
+        }
+      }
+    }
+  }
+  /*while(tmp!=NULL) {
     log_msg("\n path is %s %s\n",tmp->file_path,fpath);
     if(strcmp(tmp->file_path, fpath) == 0) {
       return tmp;
     } 
-    tmp = tmp->next;
-  }
+    tmp = tmp->next[i];
+    i++;
+  }*/
 
   return NULL;
 }
@@ -208,15 +227,20 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 
     int dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
 
-    struct file_struct directories[dir_size];
+    struct file_struct **directories[dir_size];
 
-    node->next = directories;
+    node->next = *directories;
 
     for(int i = 0; i< parent_node->dir_size; i++){
       struct file_struct *next = parent_node->next[i];
       if(next == NULL){
-        parent_node->next[i] = *node;
+        memcpy(parent_node->next[i], node, sizeof(struct file_struct));
+        break;
       }
+    }
+
+    for(int j = 0; j < dir_size;j++){
+      node->next[j] = NULL;
     }
     
     node->parent = parent_node;
@@ -649,11 +673,15 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     //calculate size of dirents that can be stored
 
     int dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
+    log_msg("/ndir size is %d/n", dir_size);
+    struct file_struct **directories[dir_size];
 
-    struct file_struct directories[dir_size];
-
-    root->next = directories;
+    root->next = *directories;
     root->dir_size = dir_size;
+
+    for(int i = 0; i < dir_size;i++){
+      root->next[i] = NULL;
+    }
 
     root->parent = NULL;
     
