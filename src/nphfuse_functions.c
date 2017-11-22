@@ -206,27 +206,19 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->dir_struct->st_mtime = time(NULL);
     node->dir_struct->st_ctime = time(NULL);
 
+    int dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
 
-    parent_node->next = node;
-    node->parent = parent_node;
+    struct file_struct directories[dir_size];
 
-    /*int dir_size = (node->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
+    node->next = directories;
 
-    struct dirent dir_names[dir_size];
-
-    node->dirents = dir_names;
-    node->dirent_size = dir_size;
-
-    for(int i = 0; i < dir_size; i++){
-      node->dirents[i].d_ino = -11;
-    }
-
-    for(int j =0; j < parent_node->dirent_size; j++){
-      if(parent_node->dirents[j].d_ino!=-11){
-        parent_node->dirents[j].d_ino = node->offset;
-        strcpy(parent_node->dirents[j].d_name,node->file_name);
+    for(int i = 0; i< parent_node->dir_size; i++){
+      if(parent_node->next[i] == NULL){
+        parent_node[i] == node;
       }
-    }*/
+    }
+    
+    node->parent = parent_node;
 
 
     char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
@@ -529,19 +521,12 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     if (node == NULL) 
         return -ENOENT;
 
-    struct file_struct *tmp = node->next;
-
-    while(tmp != NULL){
-      filler(buf, tmp->file_name, NULL, 0);
-      tmp = tmp->next;
-    }
-
-    /*for(int i = 0; i < node->dirent_size; i++){
-      if(node->dirents[i].d_ino != -11 && strlen(node->dirents[i].d_name)>1){
-          log_msg("\nfound sub dir %d %s\n",node->dirents[i].d_ino,node->dirents[i].d_name);
-          filler(buf,node->dirents[i].d_name, NULL, 0);
+    for(int i = 0; i< node->dir_size; i++){
+      if(node->next[i] != NULL){
+        struct file_struct *tmp = node->next[i];
+        filler(buf, tmp.file_name, NULL, 0);
       }
-    }*/
+    }
 
     time_t curr_time;
     time(&curr_time);
@@ -656,23 +641,21 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->dir_struct->st_mtime = time(NULL);
     root->dir_struct->st_ctime = time(NULL);
     
-    root->next = NULL;
-    root->parent = NULL;
+    
 
     char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
 
     //calculate size of dirents that can be stored
 
-    /*int dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct) - sizeof(struct dirent))/sizeof(struct dirent);
+    int dir_size = (root->dir_struct->st_blksize - sizeof(struct file_struct))/sizeof(struct file_struct);
 
-    struct dirent dir_names[dir_size];
+    struct file_struct directories[dir_size];
 
-    root->dirents = dir_names;
-    root->dirent_size = dir_size;
+    root->next = directories;
+    root->dir_size = dir_size;
 
-    for(int i = 0; i < dir_size; i++){
-      root->dirents[i].d_ino = -11;
-    }*/
+    root->parent = NULL;
+    
     memset(mem, 0, sizeof(struct file_struct));
     memcpy(mem, root, sizeof(struct file_struct));
     fprintf(stdout,"\nroot dir initialized\n");
@@ -691,3 +674,4 @@ void nphfuse_destroy(void *userdata)
 {
     log_msg("\nnphfuse_destroy(userdata=0x%08x)\n", userdata);
 }
+
