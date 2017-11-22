@@ -1,3 +1,4 @@
+// Project 3: Mitkumar Pandya, mhpandya; Rachit Shrivastava, rshriva; Yash Vora, yvora;
 /*
   NPHeap File System
   Copyright (C) 2016 Hung-Wei Tseng, Ph.D. <hungwei_tseng@ncsu.edu>
@@ -22,6 +23,7 @@
 
 int global_offset = 10202;
 
+// method to retrieve node
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   log_msg("\nretreive_node\n");
   if(root == NULL) {
@@ -36,7 +38,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
       if(strcmp(tmp->file_path, fpath) == 0) {
         log_msg("\nexit retreive_node\n");
         return tmp;
-      }else if(tmp->next != NULL){
+      }if(tmp->next != NULL){
         struct file_struct *tmp1 = tmp->next;
         while(tmp1 != NULL){
           log_msg("\n path is %s %s\n",tmp1->file_path,fpath);
@@ -47,7 +49,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
             tmp1 = tmp1->next;
           }
         }
-      }else if(tmp->next!=NULL && tmp->next->sibling!=NULL){
+      }if(tmp->next!=NULL && tmp->next->sibling!=NULL){
         tmp = tmp->next->sibling;
         while(tmp != NULL){
           fprintf(stdout,"\n path is %s %s\n",tmp->file_path,fpath);
@@ -244,14 +246,14 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     
     if(sib->is_root == true){
       if(sib->next == NULL){
-        log_msg("\n root next is null, assigned now\n");
+        log_msg("\nroot next is null, assigned now\n");
         sib->next = node;
       }else{
         struct file_struct *tmp = sib->next;
         while(tmp->sibling != NULL){
           tmp = tmp->sibling;
         }
-        log_msg("\n root next sibling is null, assigned now\n");
+        log_msg("\nroot next sibling is null, assigned now %s\n",tmp->file_name);
         tmp->sibling = node;
       }
     }
