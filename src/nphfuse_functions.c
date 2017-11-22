@@ -34,25 +34,31 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
   if(tmp->is_root == true){
       log_msg("\n path is %s %s\n",tmp->file_path,fpath);
       if(strcmp(tmp->file_path, fpath) == 0) {
+        fprintf(stdout,"\nexit retreive_node\n");
         return tmp;
       }else if(tmp->next != NULL){
         tmp = tmp->next;
-        while(tmp){
-          log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+        while(tmp != NULL){
+          fprintf(stdout,"\n path is %s %s\n",tmp->file_path,fpath);
           if(strcmp(tmp->file_path, fpath) == 0) {
+            fprintf(stdout,"\nexit retreive_node\n");
             return tmp;
+          }else{
+            tmp = tmp->next;
           }
         }
-        tmp = tmp->next;  
-      }else if(tmp->next->sibling!=NULL){
+      }else if(tmp->next!=NULL && tmp->next->sibling!=NULL){
         tmp = tmp->next->sibling;
-        while(tmp){
-          log_msg("\n path is %s %s\n",tmp->file_path,fpath);
+        while(tmp != NULL){
+          fprintf(stdout,"\n path is %s %s\n",tmp->file_path,fpath);
           if(strcmp(tmp->file_path, fpath) == 0) {
+            fprintf(stdout,"\nexit retreive_node\n");
             return tmp;
+        }else{
+          tmp = tmp->sibling;
         }
-        tmp = tmp->sibling;
       }
+    }
   }
 
   /*while(tmp) {
@@ -62,7 +68,7 @@ static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
     } 
     tmp = tmp->next;
   }*/
-
+  fprintf(stdout,"\nexit retreive_node node not found\n");
   return NULL;
 }
 
@@ -240,11 +246,11 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       if(sib->next == NULL){
         sib->next = node;
       }else{
-        struct file_node *tmp = sib->next;
-        while(next->sib){
-          next = next->sib;
+        struct file_struct *tmp = sib->next;
+        while(tmp->sibling != NULL){
+          tmp = tmp->sibling;
         }
-        next->sib = node;
+        tmp->sibling = node;
       }
     }
 
@@ -552,13 +558,13 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     struct file_struct *tmp = node;
     if(tmp->is_root == true){
       tmp = tmp->next;
-      while(tmp){
+      if(tmp != NULL){
         filler(buf, tmp->file_name, NULL ,0);
-      }
-      tmp = tmp->sibling;
-      while(tmp){
-        filler(buf,tmp->file_name, NULL, 0);
         tmp = tmp->sibling;
+        while(tmp){
+          filler(buf,tmp->file_name, NULL, 0);
+          tmp = tmp->sibling;
+        }
       }
     }
 
