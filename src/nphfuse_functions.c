@@ -281,8 +281,7 @@ int nphfuse_rmdir(const char *path)
     if(strlen(path) > PATH_MAX)
       return -1;
 
-    log_msg("\nnphfuse_rmdir(path=\"%s\", mode=0%3o)\n",
-      path, mode);
+    log_msg("\nnphfuse_rmdir(path=\"%s\")\n", path);
 
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
@@ -307,10 +306,10 @@ int nphfuse_rmdir(const char *path)
       return -1;
 
     if(node->next == NULL) 
-      node->prev->next = NULL;
+      node->parent->next = NULL;
     else {
-      node->prev->next = node->next; 
-      node->next->prev = node->prev;
+      node->parent->next = node->next; 
+      node->next->parent = node->parent;
     }
 
     
