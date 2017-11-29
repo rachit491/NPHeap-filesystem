@@ -278,7 +278,68 @@ int nphfuse_unlink(const char *path)
 /** Remove a directory */
 int nphfuse_rmdir(const char *path)
 {
-    return -1;
+    if(strlen(path) > PATH_MAX)
+      return -1;
+
+    log_msg("\nnphfuse_rmdir(path=\"%s\", mode=0%3o)\n",
+      path, mode);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+    
+
+    char *dir_name, *base_name;
+    struct file_struct *node;
+    struct file_struct *parent_node;
+    char temp_path1[PATH_MAX], temp_path2[PATH_MAX];
+    
+    strcpy(temp_path1, path);
+    strcpy(temp_path2, path);
+    
+    dir_name = dirname(temp_path1);
+    base_name = basename(temp_path2);
+
+    node = retreive_node(fpath);
+    if(node!=NULL)
+      parent_node = retreive_node(dir_name);
+    else 
+      return -1;
+
+    if(node->next == NULL) 
+      node->prev->next = NULL;
+    else {
+      node->prev->next = node->next; 
+      node->next->prev = node->prev;
+    }
+
+    
+    /*if(parent_node -> node_contents != NULL) {
+        nContents *parent_list = parent_node -> node_contents -> next;
+        while(parent_list != NULL){
+            int found = strcmp(base_name, parent_list -> node_name);
+            if ( found == 0) 
+            {
+                if (parent_list -> next == NULL) 
+                {
+                    parent_list -> prev -> next = NULL;
+                } 
+                else 
+                {
+                    parent_list -> next -> prev = parent_list -> prev;
+                    parent_list -> prev -> next = parent_list -> next;
+                    
+                }
+                free(parent_list);
+                break;
+            }
+            parent_list = parent_list -> next;
+        }
+    }*/
+
+    free(node);
+   
+    return 0;
 }
 
 /** Create a symbolic link */
