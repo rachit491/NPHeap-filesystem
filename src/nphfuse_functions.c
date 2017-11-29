@@ -307,10 +307,10 @@ int nphfuse_rmdir(const char *path)
       return -1;
 
     if(node->sibling == NULL) 
-      node->parent->sibling = NULL;
+      node->next->sibling = NULL;
     else {
-      node->parent->sibling = node->sibling; 
-      node->sibling->parent = node->parent;
+      node->next->sibling = node->sibling; 
+      node->sibling->next = node->next;
     }
 
     
