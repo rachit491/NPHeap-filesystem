@@ -300,16 +300,17 @@ int nphfuse_rmdir(const char *path)
     base_name = basename(temp_path2);
 
     node = retreive_node(fpath);
-    if(node!=NULL)
+
+    if(node != NULL)
       parent_node = retreive_node(dir_name);
     else 
       return -1;
 
-    if(node->next == NULL) 
-      node->parent->next = NULL;
+    if(node->sibling == NULL) 
+      node->parent->sibling = NULL;
     else {
-      node->parent->next = node->next; 
-      node->next->parent = node->parent;
+      node->parent->sibling = node->sibling; 
+      node->sibling->parent = node->parent;
     }
 
     
