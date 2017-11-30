@@ -534,7 +534,23 @@ int nphfuse_truncate(const char *path, off_t newsize)
 /** Change the access and/or modification times of a file */
 int nphfuse_utime(const char *path, struct utimbuf *ubuf)
 {
-        return -ENOENT;
+    
+    log_msg("\nbb_utime(path=\"%s\", ubuf=0x%08x)\n",
+      path, ubuf);
+
+    struct file_struct *node = retreive_node(fpath);
+
+    if(node == NULL){
+      log_msg("\nnode not found in _utime\n");
+      return -1;
+    }
+    
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+    node->dir_struct->st_mtime = curr_time;
+    return 0;
+    
 }
 
 /** File open operation
@@ -553,8 +569,8 @@ int nphfuse_open(const char *path, struct fuse_file_info *fi)
 
     log_fi(fi);
 
-    if ((fi->flags & O_ACCMODE) != O_RDONLY)
-        return -EACCES;
+    /*if ((fi->flags & O_ACCMODE) != O_RDONLY)
+        return -EACCES;*/
 
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
