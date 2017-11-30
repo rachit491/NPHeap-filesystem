@@ -459,7 +459,7 @@ int nphfuse_rename(const char *path, const char *newpath)
       return -1;
     }
     
-    strcpy(root->file_path, new_path);
+    strcpy(node->file_path, new_path);
     return 0;
 }
 
