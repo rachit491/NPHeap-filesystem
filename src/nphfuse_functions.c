@@ -544,7 +544,7 @@ int nphfuse_utime(const char *path, struct utimbuf *ubuf)
       log_msg("\nnode not found in _utime\n");
       return -1;
     }
-    
+
     time_t curr_time;
     time(&curr_time);
     node->dir_struct->st_atime = curr_time;
@@ -627,6 +627,8 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
 int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
        struct fuse_file_info *fi)
 {
+    log_msg("\nnphfuse_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
+      path, buf, size, offset, fi);
     return -ENOENT;
 }
 
