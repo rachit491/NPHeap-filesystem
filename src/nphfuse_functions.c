@@ -306,7 +306,11 @@ int nphfuse_rmdir(const char *path)
     else 
       return -1;
 
+    if(node->is_root != true && parent_node == NULL) 
+      return -1;
 
+    log_msg("found node and parent_node\n");
+    
     if(parent_node->next == node) {
       parent_node->next = node->sibling;
       node->sibling = NULL;
