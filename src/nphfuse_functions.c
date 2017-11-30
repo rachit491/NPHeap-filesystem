@@ -538,6 +538,10 @@ int nphfuse_utime(const char *path, struct utimbuf *ubuf)
     log_msg("\nbb_utime(path=\"%s\", ubuf=0x%08x)\n",
       path, ubuf);
 
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+
     struct file_struct *node = retreive_node(fpath);
 
     if(node == NULL){
