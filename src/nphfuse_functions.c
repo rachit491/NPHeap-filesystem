@@ -301,17 +301,17 @@ int nphfuse_rmdir(const char *path)
 
     node = retreive_node(fpath);
 
-    if(node != NULL)
+    if(node!=NULL)
       parent_node = retreive_node(dir_name);
     else 
       return -1;
 
-    if(node->sibling == NULL) 
-      node->next->sibling = NULL;
+    /*if(node->next == NULL) 
+      node->parent->next = NULL;
     else {
-      node->next->sibling = node->sibling; 
-      node->sibling->next = node->next;
-    }
+      node->parent->next = node->next; 
+      node->next->parent = node->parent;
+    }*/
 
     
     /*if(parent_node -> node_contents != NULL) {
@@ -516,7 +516,8 @@ int nphfuse_release(const char *path, struct fuse_file_info *fi)
  */
 int nphfuse_fsync(const char *path, int datasync, struct fuse_file_info *fi)
 {
-    return -1;
+    log_msg("\nnphfuse_fsync(path=\"%s\")\n", path);
+    return 0;
 }
 
 #ifdef HAVE_SYS_XATTR_H
@@ -659,6 +660,8 @@ int nphfuse_releasedir(const char *path, struct fuse_file_info *fi)
 // happens to be a directory? ??? 
 int nphfuse_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi)
 {
+    log_msg("\nnphfuse_fsyncdir(path=\"%s\", datasync=\"%d\")\n", 
+      path, datasync);
     return 0;
 }
 
