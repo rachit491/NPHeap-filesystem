@@ -448,6 +448,9 @@ int nphfuse_rename(const char *path, const char *newpath)
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path, PATH_MAX);
 
+    char *base_name;
+    base_name = basename(newpath);
+
     char new_path[PATH_MAX];
     strcpy(new_path, NPHFS_DATA->device_name);
     strncat(new_path, newpath, PATH_MAX);
@@ -460,6 +463,7 @@ int nphfuse_rename(const char *path, const char *newpath)
     }
     
     strcpy(node->file_path, new_path);
+    strcpy(node->file_name, base_name);
     return 0;
 }
 
