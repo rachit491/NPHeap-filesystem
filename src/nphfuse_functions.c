@@ -303,11 +303,15 @@ int nphfuse_rmdir(const char *path)
 
     if(node != NULL)
       parent_node = retreive_node(dir_name);
-    else 
+    else {
+      log_msg("node not found\n");
       return -1;
+    }
 
-    if(node->is_root != true && parent_node == NULL) 
+    if(node->is_root != true && parent_node == NULL){
+      log_msg("parent_node not found\n");
       return -1;
+    }
 
     log_msg("found node and parent_node\n");
     
