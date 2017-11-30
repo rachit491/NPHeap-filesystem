@@ -668,7 +668,15 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
  */
 int nphfuse_statfs(const char *path, struct statvfs *statv)
 {
-    return -1;
+     statv->f_bsize = 1;
+     statv->f_frsize = 1;
+     statv->f_blocks = 1;
+     statv->f_bfree = 1;
+     statv->f_bavail = 1;
+     statv->f_files = 1;
+     statv->f_ffree = 1;
+     statv->f_favail = 1;
+     return 0;
 }
 
 /** Possibly flush cached data
