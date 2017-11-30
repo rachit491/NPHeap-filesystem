@@ -549,10 +549,10 @@ int nphfuse_utime(const char *path, struct utimbuf *ubuf)
  */
 int nphfuse_open(const char *path, struct fuse_file_info *fi)
 {
+    log_msg("\nnphfuse_open(path=\"%s\", fi=0x%08x)\n",path, fi);
+    
     if ((fi->flags & O_ACCMODE) != O_RDONLY)
         return -EACCES;
-
-    log_msg("\nphfuse_open(path=\"%s\", fi=0x%08x)\n",path, fi);
 
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
