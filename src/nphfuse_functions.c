@@ -381,7 +381,13 @@ int nphfuse_chmod(const char *path, mode_t mode)
       node->dir_struct->st_mode = S_IFDIR | mode;
     else
       node->dir_struct->st_mode = S_IFREG | mode;   //for file
-      return 0;
+
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+    node->dir_struct->st_mtime = curr_time;
+    
+    return 0;
 }
 
 /** Change the owner and group of a file */
@@ -412,6 +418,11 @@ int nphfuse_chown(const char *path, uid_t uid, gid_t gid)
 
     node->dir_struct->st_uid = uid;
     node->dir_struct->st_gid = gid;
+
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+    node->dir_struct->st_mtime = curr_time;
 
     return 0;
 }
