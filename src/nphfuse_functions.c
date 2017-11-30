@@ -390,7 +390,7 @@ int nphfuse_chmod(const char *path, mode_t mode)
 
     if(node == NULL)
       return -ENOENT;
-    else if(node->dir_struct->is_directory == true)
+    else if(node->is_directory == true)
       node->dir_struct->st_mode = S_IFDIR | mode;
     else
       node->dir_struct->st_mode = S_IFREG | mode;   //for file
