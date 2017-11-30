@@ -226,8 +226,8 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
     node->dir_struct->st_rdev = 0;
 
     node->dir_struct->st_size = 0;
-    node->dir_struct->st_blksize = 8192;
-    node->dir_struct->st_blocks = 1;
+    //node->dir_struct->st_blksize = 8192;
+    //node->dir_struct->st_blocks = 1;
 
     node->dir_struct->st_atime = time(NULL);
     node->dir_struct->st_mtime = time(NULL);
@@ -550,7 +550,9 @@ int nphfuse_utime(const char *path, struct utimbuf *ubuf)
 int nphfuse_open(const char *path, struct fuse_file_info *fi)
 {
     log_msg("\nnphfuse_open(path=\"%s\", fi=0x%08x)\n",path, fi);
-    
+
+    log_fi(fi);
+
     if ((fi->flags & O_ACCMODE) != O_RDONLY)
         return -EACCES;
 
