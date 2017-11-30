@@ -386,8 +386,34 @@ int nphfuse_chmod(const char *path, mode_t mode)
 
 /** Change the owner and group of a file */
 int nphfuse_chown(const char *path, uid_t uid, gid_t gid)
-{
-        return -ENOENT;
+{ 
+    log_msg("\nnphfuse_chown(path=\"%s\", uid=%d, gid=%d)\n",
+      path, uid, gid);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+
+    char *dir_name, *base_name;
+    struct file_struct *node;
+    struct file_struct *parent_node;
+    char temp_path1[PATH_MAX], temp_path2[PATH_MAX];
+
+    strcpy(temp_path1, path);
+    strcpy(temp_path2, path);
+
+    dir_name = dirname(temp_path1);
+    base_name = basename(temp_path2);
+
+    node = retreive_node(fpath);
+
+    if(node == NULL)
+      return -ENOENT;
+
+    node->dir_struct->st_uid = uid;
+    node->dir_struct->st_gid = gid;
+
+    return 0;
 }
 
 /** Change the size of a file */
