@@ -301,41 +301,28 @@ int nphfuse_rmdir(const char *path)
 
     node = retreive_node(fpath);
 
-    if(node!=NULL)
+    if(node != NULL)
       parent_node = retreive_node(dir_name);
     else 
       return -1;
 
-    if(node->next == NULL) 
-      node->parent->next = NULL;
-    else {
-      node->parent->next = node->next; 
-      node->next->parent = node->parent;
-    }
 
-    
-    /*if(parent_node -> node_contents != NULL) {
-        nContents *parent_list = parent_node -> node_contents -> next;
-        while(parent_list != NULL){
-            int found = strcmp(base_name, parent_list -> node_name);
-            if ( found == 0) 
-            {
-                if (parent_list -> next == NULL) 
-                {
-                    parent_list -> prev -> next = NULL;
-                } 
-                else 
-                {
-                    parent_list -> next -> prev = parent_list -> prev;
-                    parent_list -> prev -> next = parent_list -> next;
-                    
-                }
-                free(parent_list);
-                break;
-            }
-            parent_list = parent_list -> next;
-        }
-    }*/
+    if(parent_node->next == node) {
+      parent_node->next = node->sibling;
+      node->sibling = NULL;
+      node->parent = NULL;
+      node->next = NULL;
+    }
+    else {
+      struct file_struct *tmp = node->parent->next;
+      while(tmp->sibling != node) {
+        tmp = tmp->sibling;
+      }
+      tmp->sibling = node->sibling;
+      node->sibling = NULL;
+      node->parent = NULL;
+      node->next = NULL;
+    }
 
     free(node);
    
