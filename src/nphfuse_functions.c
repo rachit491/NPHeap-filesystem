@@ -441,7 +441,26 @@ int nphfuse_symlink(const char *path, const char *link)
 // both path and newpath are fs-relative
 int nphfuse_rename(const char *path, const char *newpath)
 {
-    return -1;
+
+    log_msg("\nnphfuse_rename(path=\"%s\")\n", path);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+
+    char new_path[PATH_MAX];
+    strcpy(new_path, NPHFS_DATA->device_name);
+    strncat(new_path, newpath, PATH_MAX);
+
+    struct file_struct *node = retreive_node(fpath);
+
+    if(node == NULL){
+      log_msg("\nnphfuse_rename node not found\n");
+      return -1;
+    }
+    
+    strcpy(root->file_path, new_path);
+    return 0;
 }
 
 /** Create a hard link to a file */
