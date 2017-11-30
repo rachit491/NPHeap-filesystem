@@ -595,6 +595,8 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
     log_msg("\nphfuse_read(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
       path, buf, size, offset, fi);
     return 0;
+
+    //return -ENOENT;
 }
 
 /** Write data to an open file
