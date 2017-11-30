@@ -172,7 +172,95 @@ int nphfuse_readlink(const char *path, char *link, size_t size)
  */
 int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
 {
-    return -ENOENT;
+    log_msg("\nphfuse_mknod(path=\"%s\", mode=0%3o, dev=%lld)\n",
+    path, mode, dev);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+    
+
+    char *base_name, *dir_name;
+    char temp[PATH_MAX], temp1[PATH_MAX];
+    strcpy(temp, path);
+    strcpy(temp1, path);
+    dir_name = dirname(temp);
+    base_name = basename(temp1);
+
+    log_msg("fpath: %s,dir_name: %s, base_name: %s", fpath, dir_name, base_name);
+
+    struct file_struct *node = retreive_node(fpath);
+
+    if(node != NULL){
+      return -1;
+    }
+
+    node = (struct file_struct*)malloc(sizeof(struct file_struct));
+
+    char parent_path[PATH_MAX];
+    strcpy(parent_path, NPHFS_DATA->device_name);
+    strncat(parent_path, dir_name , PATH_MAX);
+
+    struct file_struct *parent_node = retreive_node(parent_path);
+    if(parent_node == NULL){
+      log_msg("\n node is null\n");
+      return -1;
+    }
+
+    strcpy(node->file_name, base_name);
+    strcpy(node->file_path, fpath);
+
+    node->is_directory = false;
+    node->offset = global_offset++;
+    
+    node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+
+    node->dir_struct->st_dev = NPHFS_DATA->devfd;
+    node->dir_struct->st_ino = node->offset;
+
+    node->dir_struct->st_mode = S_IFREG | mode;
+    node->dir_struct->st_nlink = 1;
+
+    node->dir_struct->st_uid = getuid();
+    node->dir_struct->st_gid = getgid();
+    node->dir_struct->st_rdev = 0;
+
+    node->dir_struct->st_size = 0;
+    node->dir_struct->st_blksize = 8192;
+    node->dir_struct->st_blocks = 1;
+
+    node->dir_struct->st_atime = time(NULL);
+    node->dir_struct->st_mtime = time(NULL);
+    node->dir_struct->st_ctime = time(NULL);
+
+    node->next = NULL;
+    node->parent = parent_node;
+
+    struct file_struct *sib = parent_node;
+    
+    if(sib->is_root == true){
+      if(sib->next == NULL){
+        log_msg("\nroot next is null, assigned now\n");
+        sib->next = node;
+      }else{
+        struct file_struct *tmp = sib->next;
+        while(tmp->sibling != NULL){
+          tmp = tmp->sibling;
+        }
+        log_msg("\nroot next sibling is null, assigned now %s\n",tmp->file_name);
+        tmp->sibling = node;
+      }
+    }
+
+
+    char *mem = (char*) npheap_alloc(NPHFS_DATA->devfd, node->offset, sizeof(struct file_struct));
+    memset(mem, 0, sizeof(struct file_struct));
+    memcpy(mem, node, sizeof(struct file_struct));
+    //log_syscall("mkdir", mkdir(fpath, mode), 0);
+
+    log_msg("\nfile created\n");
+
+    return 0;
 }
 
 /** Create a directory */
@@ -333,6 +421,8 @@ int nphfuse_rmdir(const char *path)
     }
 
     free(node);
+
+    npheap_delete(NPHFS_DATA->devfd, node->offset);
    
     return 0;
 }
@@ -462,7 +552,20 @@ int nphfuse_open(const char *path, struct fuse_file_info *fi)
     if ((fi->flags & O_ACCMODE) != O_RDONLY)
         return -EACCES;
 
-    return -ENOENT;
+    log_msg("\nphfuse_open(path=\"%s\", fi=0x%08x)\n",path, fi);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+
+    struct file_struct *node = retreive_node(fpath);
+    
+    if(node == NULL) {
+      log_msg("\nnode not found\n");
+      return -ENOENT;
+    }
+
+    return 0;
 
 }
 
