@@ -306,12 +306,12 @@ int nphfuse_rmdir(const char *path)
     else 
       return -1;
 
-    /*if(node->next == NULL) 
+    if(node->next == NULL) 
       node->parent->next = NULL;
     else {
       node->parent->next = node->next; 
       node->next->parent = node->parent;
-    }*/
+    }
 
     
     /*if(parent_node -> node_contents != NULL) {
@@ -368,7 +368,33 @@ int nphfuse_link(const char *path, const char *newpath)
 /** Change the permission bits of a file */
 int nphfuse_chmod(const char *path, mode_t mode)
 {
-        return -ENOENT;
+    log_msg("\nnphfuse_chmod(path=\"%s\", mode=0%3o)\n", path, mode);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+    
+
+    char *dir_name, *base_name;
+    struct file_struct *node;
+    struct file_struct *parent_node;
+    char temp_path1[PATH_MAX], temp_path2[PATH_MAX];
+    
+    strcpy(temp_path1, path);
+    strcpy(temp_path2, path);
+    
+    dir_name = dirname(temp_path1);
+    base_name = basename(temp_path2);
+
+    node = retreive_node(fpath);
+
+    if(node == NULL)
+      return -ENOENT;
+    else if(node->dir_struct->is_directory == true)
+      node->dir_struct->st_mode = S_IFDIR | mode;
+    else
+      node->dir_struct->st_mode = S_IFREG | mode;   //for file
+      return 0;
 }
 
 /** Change the owner and group of a file */
