@@ -559,11 +559,16 @@ int nphfuse_open(const char *path, struct fuse_file_info *fi)
     strncat(fpath, path , PATH_MAX);
 
     struct file_struct *node = retreive_node(fpath);
-    
+
     if(node == NULL) {
       log_msg("\nnode not found\n");
       return -ENOENT;
     }
+
+    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+      npheap_getsize(NPHFS_DATA->devfd, node->offset));
+
+    fi->fh = (intptr_t) mapped_data;
 
     return 0;
 
@@ -587,7 +592,9 @@ int nphfuse_open(const char *path, struct fuse_file_info *fi)
 // returned by read.
 int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    return -ENOENT;
+    log_msg("\nphfuse_read(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
+      path, buf, size, offset, fi);
+    return 0;
 }
 
 /** Write data to an open file
@@ -862,7 +869,9 @@ int nphfuse_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi)
  */
 int nphfuse_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_info *fi)
 {
-        return -ENOENT;
+    log_msg("\nphfuse_fgetattr\n");
+    int restat = nphfuse_getattr(path, statbuf);
+    return retstat;
 }
 
 void *nphfuse_init(struct fuse_conn_info *conn)
