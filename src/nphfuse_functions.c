@@ -717,12 +717,24 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
       return -EISDIR;
     }
 
+    if(offset < node->dir_struct->st_size) {
+      struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+        npheap_getsize(NPHFS_DATA->devfd, node->offset));
+
+      if(node->dir_struct->st_size - offset < size) {
+        size = node->dir_struct->st_size - offset;
+        memcpy((intptr_t) mapped_data + offset, buf, size);
+      } else {
+        size = 0;
+      }
+    }
+
     time_t curr_time;
     time(&curr_time);
     node->dir_struct->st_atime = curr_time;
     node->dir_struct->st_mtime = curr_time;
 
-    return npheap_getsize(NPHFS_DATA->devfd, node->offset);
+    return size;
 
     //return -ENOENT;
 }
