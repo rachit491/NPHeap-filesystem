@@ -795,6 +795,8 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
 
     if(size > 0) {
 
+      log_msg("inside write, size is %d\n",size);
+
       if(node->dir_struct->st_size == 0) {
         offset = 0;
       }
