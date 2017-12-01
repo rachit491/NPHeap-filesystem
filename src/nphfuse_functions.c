@@ -870,26 +870,26 @@ int nphfuse_fsync(const char *path, int datasync, struct fuse_file_info *fi)
 /** Set extended attributes */
 int nphfuse_setxattr(const char *path, const char *name, const char *value, size_t size, int flags)
 {
-    return -61;
+    return 0;
 }
 
 /** Get extended attributes */
 int nphfuse_getxattr(const char *path, const char *name, char *value, size_t size)
 {
     
-    return -61;
+    return 0;
 }
 
 /** List extended attributes */
 int nphfuse_listxattr(const char *path, char *list, size_t size)
 {
-    return -61;
+    return 0;
 }
 
 /** Remove extended attributes */
 int nphfuse_removexattr(const char *path, const char *name)
 {
-    return -61;
+    return 0;
 }
 #endif
 
