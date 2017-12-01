@@ -1086,10 +1086,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root = (struct file_struct *) npheap_alloc(NPHFS_DATA->devfd, 0, sizeof(struct file_struct));
 
     if(root->is_directory == true) {
-      fprintf(stdout, "root is not NULL\n");
+      fprintf(stdout, "root is not NULL, mode=0%3o\n", root->dir_struct->st_mode);
       return NPHFS_DATA;
     } else {
-      fprintf(stdout, "root is NULL\n");
+      fprintf(stdout, "root is NULL, mode=0%3o\n", root->dir_struct->st_mode);
       memset(root, 0 ,sizeof(struct file_struct));
       
       strcpy(root->file_name, "/");
