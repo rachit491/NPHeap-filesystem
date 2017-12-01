@@ -345,6 +345,18 @@ int nphfuse_mkdir(const char *path, mode_t mode)
         log_msg("\nroot next sibling is null, assigned now %s\n",tmp->file_name);
         tmp->sibling = node;
       }
+    }else {
+      if(sib->next == NULL){
+        log_msg("\nparent next is null, assigned now\n");
+        sib->next = node;
+      }else{
+        struct file_struct *tmp = sib->next;
+        while(tmp->sibling != NULL){
+          tmp = tmp->sibling;
+        }
+        log_msg("\nparent next sibling is null, assigned now %s\n",tmp->file_name);
+        tmp->sibling = node;
+      }
     }
 
 
@@ -807,13 +819,11 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
 int nphfuse_statfs(const char *path, struct statvfs *statv)
 {
      statv->f_bsize = 1;
-     statv->f_frsize = 1;
      statv->f_blocks = 1;
      statv->f_bfree = 1;
      statv->f_bavail = 1;
      statv->f_files = 1;
      statv->f_ffree = 1;
-     statv->f_favail = 1;
      return 0;
 }
 
