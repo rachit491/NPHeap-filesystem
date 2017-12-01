@@ -828,6 +828,8 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
       node->dir_struct->st_atime = curr_time;
       node->dir_struct->st_mtime = curr_time;
 
+      node->dir_struct->st_size = size;
+      
       return size;
     }
     log_msg("\n inside write size is 0\n");
