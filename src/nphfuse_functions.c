@@ -360,7 +360,68 @@ int nphfuse_mkdir(const char *path, mode_t mode)
 /** Remove a file */
 int nphfuse_unlink(const char *path)
 {
-    return -1;
+    if(strlen(path) > PATH_MAX)
+      return -1;
+
+    log_msg("\nnphfuse_unlink(path=\"%s\")\n", path);
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path, PATH_MAX);
+    
+
+    char *dir_name, *base_name;
+    struct file_struct *node;
+    struct file_struct *parent_node;
+    char temp_path1[PATH_MAX], temp_path2[PATH_MAX];
+    
+    strcpy(temp_path1, path);
+    strcpy(temp_path2, path);
+    
+    dir_name = dirname(temp_path1);
+    base_name = basename(temp_path2);
+
+    node = retreive_node(fpath);
+
+    if(node->is_directory == true)
+      return -1;
+
+    if(node != NULL)
+      parent_node = node->parent;
+    else {
+      log_msg("node not found\n");
+      return -1;
+    }
+
+    if(node->is_root != true && parent_node == NULL){
+      log_msg("parent_node not found\n");
+      return -1;
+    }
+
+    log_msg("found node and parent_node\n");
+    
+    if(parent_node->next == node) {
+      parent_node->next = node->sibling;
+      node->sibling = NULL;
+      node->parent = NULL;
+      node->next = NULL;
+    }
+    else {
+      struct file_struct *tmp = node->parent->next;
+      while(tmp->sibling != node) {
+        tmp = tmp->sibling;
+      }
+      tmp->sibling = node->sibling;
+      node->sibling = NULL;
+      node->parent = NULL;
+      node->next = NULL;
+    }
+
+    free(node);
+
+    npheap_delete(NPHFS_DATA->devfd, node->offset);
+   
+    return 0;
 }
 
 /** Remove a directory */
