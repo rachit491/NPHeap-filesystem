@@ -1085,7 +1085,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
 
     root = (struct file_struct *) npheap_alloc(NPHFS_DATA->devfd, 0, sizeof(struct file_struct));
 
-    if(root != NULL) {
+    if(root->dir_struct->st_ino > 0) {
       return NPHFS_DATA;
     } else {
       memset(root, 0 ,sizeof(struct file_struct));
