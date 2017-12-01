@@ -735,7 +735,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
 
     if(node == NULL) {
       log_msg("\nnode not found\n");
-      return -ENOENT;
+      return -1;
     }
 
     if(node->is_directory == true) {
@@ -812,7 +812,7 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
       if(mapped_data == NULL)
         return -ENOSPC;
 
-      memcpy((intptr_t) mapped_data + offset, buf, size);
+      memcpy((char *) mapped_data + offset, buf, size);
 
       time_t curr_time;
       time(&curr_time);
