@@ -1005,6 +1005,16 @@ int nphfuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
           tmp = tmp->sibling;
         }
       }
+    }else{
+      tmp = tmp->next;
+      if(tmp != NULL){
+        filler(buf, tmp->file_name, NULL ,0);
+        tmp = tmp->sibling;
+        while(tmp){
+          filler(buf,tmp->file_name, NULL, 0);
+          tmp = tmp->sibling;
+        }
+      }
     }
 
     time_t curr_time;
