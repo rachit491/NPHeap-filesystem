@@ -1086,8 +1086,10 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root = (struct file_struct *) npheap_alloc(NPHFS_DATA->devfd, 0, sizeof(struct file_struct));
 
     if(root->dir_struct != NULL) {
+      fprintf(stdout, "root is not NULL\n");
       return NPHFS_DATA;
     } else {
+      fprintf(stdout, "root is NULL\n");
       memset(root, 0 ,sizeof(struct file_struct));
       
       strcpy(root->file_name, "/");
