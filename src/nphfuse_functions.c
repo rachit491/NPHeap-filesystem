@@ -761,6 +761,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
     node->dir_struct->st_mtime = curr_time;
 
     log_msg("\nsize is %d\n",size);
+    node->dir_struct->st_size = size;
     return size;
 
     //return -ENOENT;
@@ -829,10 +830,11 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
       node->dir_struct->st_mtime = curr_time;
 
       node->dir_struct->st_size = size;
-      
+
       return size;
     }
     log_msg("\n inside write size is 0\n");
+    node->dir_struct->st_size = size;
 
     return size;
 }
