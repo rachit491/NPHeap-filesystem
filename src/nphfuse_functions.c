@@ -782,6 +782,7 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
     char fpath[PATH_MAX];
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, path , PATH_MAX);
+    long npheap_size;
 
     struct file_struct *node = retreive_node(fpath);
 
@@ -807,8 +808,13 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
         offset = node->dir_struct->st_size;
       }
 
+      npheap_size = npheap_getsize(NPHFS_DATA->devfd, node->offset);
+
+      if(size > npheap_size)
+        size = npheap_size;
+
       char *mapped_data = (char *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
-        npheap_getsize(NPHFS_DATA->devfd, node->offset));
+        npheap_size);
 
       if(mapped_data == NULL)
         return -ENOSPC;
