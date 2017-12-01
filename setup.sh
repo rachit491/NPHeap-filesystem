@@ -1,6 +1,6 @@
 fusermount -u src/mount
 rm -rf src/mount src/NPHeapFS.log src/nphfuse
-sudo rmmod npheap.ko
+sudo rmmod npheap
 
 ./configure
 make
