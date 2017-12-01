@@ -915,8 +915,22 @@ int nphfuse_setxattr(const char *path, const char *name, const char *value, size
 /** Get extended attributes */
 int nphfuse_getxattr(const char *path, const char *name, char *value, size_t size)
 {
+    int retstat = 0;
+    char fpath[PATH_MAX];
     
-    return 0;
+    log_msg("\nnphfuse_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
+      path, name, value, size);
+
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+
+    retstat = log_syscall("lgetxattr", lgetxattr(fpath, name, value, size), 0);
+    if (retstat >= 0)
+    log_msg("    value = \"%s\"\n", value);
+    
+    return retstat;
+    
+    //return 0;
 }
 
 /** List extended attributes */
