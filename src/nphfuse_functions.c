@@ -734,6 +734,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
     node->dir_struct->st_atime = curr_time;
     node->dir_struct->st_mtime = curr_time;
 
+    log_msg("\nsize is %d\n",size);
     return size;
 
     //return -ENOENT;
