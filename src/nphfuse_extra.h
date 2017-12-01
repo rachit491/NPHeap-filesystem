@@ -30,4 +30,5 @@ struct file_struct {
     struct file_struct *next;
     struct file_struct *sibling;
     bool is_root;
+    char *file_data;
 }*root;

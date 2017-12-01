@@ -228,6 +228,7 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
     node->dir_struct->st_rdev = 0;
 
     node->dir_struct->st_size = 0;
+    node->file_data = NULL;
     //node->dir_struct->st_blksize = 8192;
     //node->dir_struct->st_blocks = 1;
 
@@ -748,7 +749,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
 
       if(node->dir_struct->st_size - offset < size) {
         size = node->dir_struct->st_size - offset;
-        memcpy(buf, (intptr_t) mapped_data + offset, size);
+        memcpy(buf, node->file_data + offset, size);
       } else {
         size = 0;
       }
@@ -806,13 +807,15 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
         offset = node->dir_struct->st_size;
       }
 
-      struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+      char *mapped_data = (char *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
         npheap_getsize(NPHFS_DATA->devfd, node->offset));
 
       if(mapped_data == NULL)
         return -ENOSPC;
 
-      memcpy((char *) mapped_data + offset, buf, size);
+      node->file_data = mapped_data;
+
+      memcpy(node->file_data + offset, buf, size);
 
       time_t curr_time;
       time(&curr_time);
