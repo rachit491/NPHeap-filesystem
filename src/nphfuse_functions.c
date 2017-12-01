@@ -163,6 +163,7 @@ int nphfuse_getattr(const char *path, struct stat *stbuf)
 // nphfuse_readlink() code by Bernardo F Costa (thanks!)
 int nphfuse_readlink(const char *path, char *link, size_t size)
 {
+    log_msg("\nnphfuse_readlink\n");
     return -1;
 }
 
@@ -909,6 +910,7 @@ int nphfuse_fsync(const char *path, int datasync, struct fuse_file_info *fi)
 /** Set extended attributes */
 int nphfuse_setxattr(const char *path, const char *name, const char *value, size_t size, int flags)
 {
+    log_msg("\nnphfuse_setxattr\n");
     return 0;
 }
 
@@ -936,6 +938,7 @@ int nphfuse_getxattr(const char *path, const char *name, char *value, size_t siz
 /** List extended attributes */
 int nphfuse_listxattr(const char *path, char *list, size_t size)
 {
+    log_msg("\nnphfuse_listxattr\n");
     return 0;
 }
 
