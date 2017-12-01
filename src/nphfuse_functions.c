@@ -22,6 +22,7 @@
 #include <npheap.h>
 
 int global_offset = 10202;
+int _offset = 0;
 
 // method to retrieve node
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
@@ -700,7 +701,28 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
 {
     log_msg("\nphfuse_read(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
       path, buf, size, offset, fi);
-    return 0;
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+
+    struct file_struct *node = retreive_node(fpath);
+
+    if(node == NULL) {
+      log_msg("\nnode not found\n");
+      return -ENOENT;
+    }
+
+    if(node->is_directory == true) {
+      return -EISDIR;
+    }
+
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+    node->dir_struct->st_mtime = curr_time;
+
+    return npheap_getsize(NPHFS_DATA->devfd, node->offset);
 
     //return -ENOENT;
 }
@@ -717,7 +739,33 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
 {
     log_msg("\nnphfuse_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
       path, buf, size, offset, fi);
-    return -ENOENT;
+
+    char fpath[PATH_MAX];
+    strcpy(fpath, NPHFS_DATA->device_name);
+    strncat(fpath, path , PATH_MAX);
+
+    struct file_struct *node = retreive_node(fpath);
+
+    if(node == NULL) {
+      log_msg("\nnode not found\n");
+      return -ENOENT;
+    }
+
+    if(node->is_directory == true) {
+      return -EISDIR;
+    }
+
+    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+      npheap_getsize(NPHFS_DATA->devfd, node->offset));
+
+    memcpy((intptr_t) mapped_data + offset, buf, size);
+
+    time_t curr_time;
+    time(&curr_time);
+    node->dir_struct->st_atime = curr_time;
+    node->dir_struct->st_mtime = curr_time;
+
+    return 0;
 }
 
 /** Get file system statistics
