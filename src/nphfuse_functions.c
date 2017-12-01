@@ -1089,7 +1089,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
       fprintf(stdout, "root is not NULL, mode=0%3o\n", root->dir_struct->st_mode);
       return NPHFS_DATA;
     } else {
-      fprintf(stdout, "root is NULL, mode=0%3o\n", root->dir_struct->st_mode);
+      fprintf(stdout, "root is NULL\n");
       memset(root, 0 ,sizeof(struct file_struct));
       
       strcpy(root->file_name, "/");
