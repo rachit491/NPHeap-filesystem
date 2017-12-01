@@ -22,7 +22,7 @@
 #include <npheap.h>
 
 int global_offset = 10202;
-int _offset = 0;
+int _offset = 1;
 
 // method to retrieve node
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
@@ -290,7 +290,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       return -1;
     }
 
-    node = (struct file_struct*)malloc(sizeof(struct file_struct));
+    node = (struct file_struct*)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
     strcpy(parent_path, NPHFS_DATA->device_name);
@@ -308,7 +308,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->is_directory = true;
     node->offset = global_offset++;
     
-    node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+    node->dir_struct = (struct stat *)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct stat));
 
     node->dir_struct->st_dev = NPHFS_DATA->devfd;
     node->dir_struct->st_ino = node->offset;
@@ -1083,7 +1083,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, "/", PATH_MAX);
 
-    root = (struct file_struct *) malloc(sizeof(struct file_struct));
+    root = (struct file_struct *) npheap_alloc(NPHFS_DATA->devfd, 0, sizeof(struct file_struct));
     memset(root, 0 ,sizeof(struct file_struct));
     
     strcpy(root->file_name, "/");
@@ -1092,7 +1092,7 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     root->is_directory = true;
     root->offset = global_offset++;
     
-    root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
+    root->dir_struct = (struct stat *)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct stat));
 
     memset(root->dir_struct, 0 ,sizeof(struct stat));
 
