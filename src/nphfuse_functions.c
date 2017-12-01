@@ -768,17 +768,33 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
       return -EISDIR;
     }
 
-    struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
-      npheap_getsize(NPHFS_DATA->devfd, node->offset));
+    if(size > 0) {
 
-    memcpy((intptr_t) mapped_data + offset, buf, size);
+      if(node->dir_struct->st_size == 0) {
+        offset = 0;
+      }
 
-    time_t curr_time;
-    time(&curr_time);
-    node->dir_struct->st_atime = curr_time;
-    node->dir_struct->st_mtime = curr_time;
+      if(offset > node->dir_struct->st_size) {
+        offset = node->dir_struct->st_size;
+      }
 
-    return 0;
+      struct file_struct *mapped_data = (struct file_struct *)npheap_alloc(NPHFS_DATA->devfd, node->offset, 
+        npheap_getsize(NPHFS_DATA->devfd, node->offset));
+
+      if(mapped_data == NULL)
+        return -ENOSPC;
+
+      memcpy((intptr_t) mapped_data + offset, buf, size);
+
+      time_t curr_time;
+      time(&curr_time);
+      node->dir_struct->st_atime = curr_time;
+      node->dir_struct->st_mtime = curr_time;
+
+      return size;
+    }
+
+    return size;
 }
 
 /** Get file system statistics
