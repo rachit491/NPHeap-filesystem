@@ -723,7 +723,7 @@ int nphfuse_read(const char *path, char *buf, size_t size, off_t offset, struct 
 
       if(node->dir_struct->st_size - offset < size) {
         size = node->dir_struct->st_size - offset;
-        memcpy((intptr_t) mapped_data + offset, buf, size);
+        memcpy(buf, (intptr_t) mapped_data + offset, size);
       } else {
         size = 0;
       }
