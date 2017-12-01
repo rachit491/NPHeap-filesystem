@@ -818,6 +818,7 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
 
       return size;
     }
+    log_msg("\n inside write size is 0\n");
 
     return size;
 }
