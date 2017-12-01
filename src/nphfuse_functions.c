@@ -790,6 +790,7 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
     }
 
     if(node->is_directory == true) {
+      log_msg("\nnode is directory\n");
       return -EISDIR;
     }
 
