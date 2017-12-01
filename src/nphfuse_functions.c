@@ -173,7 +173,7 @@ int nphfuse_readlink(const char *path, char *link, size_t size)
  */
 int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
 {
-    log_msg("\nphfuse_mknod(path=\"%s\", mode=0%3o, dev=%lld)\n",
+    log_msg("\nnphfuse_mknod(path=\"%s\", mode=0%3o, dev=%lld)\n",
     path, mode, dev);
 
     char fpath[PATH_MAX];
@@ -249,6 +249,18 @@ int nphfuse_mknod(const char *path, mode_t mode, dev_t dev)
           tmp = tmp->sibling;
         }
         log_msg("\nroot next sibling is null, assigned now %s\n",tmp->file_name);
+        tmp->sibling = node;
+      }
+    }else {
+      if(sib->next == NULL){
+        log_msg("\nparent next is null, assigned now\n");
+        sib->next = node;
+      }else{
+        struct file_struct *tmp = sib->next;
+        while(tmp->sibling != NULL){
+          tmp = tmp->sibling;
+        }
+        log_msg("\nparent next sibling is null, assigned now %s\n",tmp->file_name);
         tmp->sibling = node;
       }
     }
