@@ -22,7 +22,7 @@
 #include <npheap.h>
 
 int global_offset = 10202;
-int _offset = 1;
+//int _offset = 1;
 
 // method to retrieve node
 static struct file_struct * retreive_node(char fpath[PATH_MAX]) {
@@ -304,7 +304,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
       return -1;
     }
 
-    node = (struct file_struct*)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct file_struct));
+    node = (struct file_struct*)malloc(sizeof(struct file_struct));
 
     char parent_path[PATH_MAX];
     strcpy(parent_path, NPHFS_DATA->device_name);
@@ -322,7 +322,7 @@ int nphfuse_mkdir(const char *path, mode_t mode)
     node->is_directory = true;
     node->offset = global_offset++;
     
-    node->dir_struct = (struct stat *)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct stat));
+    node->dir_struct = (struct stat *)malloc(sizeof(struct stat));
 
     node->dir_struct->st_dev = NPHFS_DATA->devfd;
     node->dir_struct->st_ino = node->offset;
@@ -1149,57 +1149,50 @@ void *nphfuse_init(struct fuse_conn_info *conn)
     strcpy(fpath, NPHFS_DATA->device_name);
     strncat(fpath, "/", PATH_MAX);
 
-    root = (struct file_struct *) npheap_alloc(NPHFS_DATA->devfd, 0, sizeof(struct file_struct));
 
-    if(root!=NULL && root->is_directory == true) {
-      fprintf(stdout,"root is not null");
-      fprintf(stdout, "root is not NULL, mode=0%3o\n", root->dir_struct->st_mode);
-      return NPHFS_DATA;
-    } else {
-      fprintf(stdout, "root is NULL\n");
-      memset(root, 0 ,sizeof(struct file_struct));
-      
-      strcpy(root->file_name, "/");
-      strcpy(root->file_path, fpath);
+    root = (struct file_struct *) malloc(sizeof(struct file_struct));
+    memset(root, 0 ,sizeof(struct file_struct));
+    
+    strcpy(root->file_name, "/");
+    strcpy(root->file_path, fpath);
 
-      root->is_directory = true;
-      root->offset = global_offset++;
-      
-      root->dir_struct = (struct stat *)npheap_alloc(NPHFS_DATA->devfd, _offset++, sizeof(struct stat));
+    root->is_directory = true;
+    root->offset = global_offset++;
+    
+    root->dir_struct = (struct stat *)malloc(sizeof(struct stat));
 
-      memset(root->dir_struct, 0 ,sizeof(struct stat));
+    memset(root->dir_struct, 0 ,sizeof(struct stat));
 
-      root->dir_struct->st_mode = S_IFDIR | 0755;
-      root->dir_struct->st_nlink = 2;
-      root->dir_struct->st_uid = getuid();
-      root->dir_struct->st_gid = getgid();
+    root->dir_struct->st_mode = S_IFDIR | 0755;
+    root->dir_struct->st_nlink = 2;
+    root->dir_struct->st_uid = getuid();
+    root->dir_struct->st_gid = getgid();
 
-      root->dir_struct->st_dev = NPHFS_DATA->devfd;
-      root->dir_struct->st_ino = root->offset;
-      root->dir_struct->st_size = 0;
+    root->dir_struct->st_dev = NPHFS_DATA->devfd;
+    root->dir_struct->st_ino = root->offset;
+    root->dir_struct->st_size = 0;
 
 
-      root->dir_struct->st_blksize = 8192;
-      root->dir_struct->st_blocks = 1;
-      root->dir_struct->st_rdev = 0;
+    root->dir_struct->st_blksize = 8192;
+    root->dir_struct->st_blocks = 1;
+    root->dir_struct->st_rdev = 0;
 
-      root->dir_struct->st_atime = time(NULL);
-      root->dir_struct->st_mtime = time(NULL);
-      root->dir_struct->st_ctime = time(NULL);
-      
-      
+    root->dir_struct->st_atime = time(NULL);
+    root->dir_struct->st_mtime = time(NULL);
+    root->dir_struct->st_ctime = time(NULL);
+    
+    
 
-      char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
+    char *mem = (char *) npheap_alloc(NPHFS_DATA->devfd, root->offset, sizeof(struct file_struct));
 
-      root->parent = NULL;
-      root->next = NULL;
-      root->sibling = NULL;
-      root->is_root = true;
-      
-      memset(mem, 0, sizeof(struct file_struct));
-      memcpy(mem, root, sizeof(struct file_struct));
-      fprintf(stdout,"\nroot dir initialized\n");
-    }
+    root->parent = NULL;
+    root->next = NULL;
+    root->sibling = NULL;
+    root->is_root = true;
+    
+    memset(mem, 0, sizeof(struct file_struct));
+    memcpy(mem, root, sizeof(struct file_struct));
+    fprintf(stdout,"\nroot dir initialized\n");
 
     return NPHFS_DATA;
 }
