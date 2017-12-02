@@ -851,7 +851,7 @@ int nphfuse_statfs(const char *path, struct statvfs *statv)
      statv->f_bsize = 16384*8192;
      statv->f_blocks = 8192;
      statv->f_bfree = (16384-2)*8192;
-     statv->f_bavail = statv->f_bsize - statv->f_bfree;
+     statv->f_bavail = statv->f_bfree;
      statv->f_files = 2;
      statv->f_ffree = 16384 - 2;
      return 0;
