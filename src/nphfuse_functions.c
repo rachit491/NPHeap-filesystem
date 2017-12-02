@@ -848,9 +848,9 @@ int nphfuse_write(const char *path, const char *buf, size_t size, off_t offset,
  */
 int nphfuse_statfs(const char *path, struct statvfs *statv)
 {
-     statv->f_bsize = 16384*8192;
-     statv->f_blocks = 8192;
-     statv->f_bfree = (16384-2)*8192;
+     statv->f_blocks = 16384*8192;
+     statv->f_bsize = 8192;
+     statv->f_bfree = (16384-2);
      statv->f_bavail = statv->f_bfree;
      statv->f_files = 2;
      statv->f_ffree = 16384 - 2;
